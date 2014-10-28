@@ -23,6 +23,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     <properties>
         <java-version>1.7</java-version>
         <jetty-version>9.1.5.v20140505</jetty-version>
+        <groovy-version>2.3.7</groovy-version>
         <org.slf4j-version>1.7.5</org.slf4j-version>
     </properties>
     <dependencies>
@@ -98,6 +99,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-xml</artifactId>
             <version>${jetty-version}</version>
+        </dependency>
+
+        <!-- Groovy -->
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>${groovy-version}</version>
         </dependency>
 
     </dependencies>
