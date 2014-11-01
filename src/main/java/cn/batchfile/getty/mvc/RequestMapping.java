@@ -75,7 +75,10 @@ public class RequestMapping {
 	}
 	
 	private String getExtension(String file) {
-		String name = StringUtils.substringAfterLast(file, "/");
+		String name = file;
+		if (StringUtils.contains(name, '/')) {
+			name = StringUtils.substringAfterLast(name, "/");
+		}
 		return StringUtils.substringAfterLast(name, ".");
 	}
 	
