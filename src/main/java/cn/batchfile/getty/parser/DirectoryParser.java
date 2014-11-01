@@ -56,7 +56,24 @@ public class DirectoryParser extends Parser {
 			String time = format.format(file.lastModified());
 			String type = file.isDirectory() ? "DIR" : "FILE";
 			String icon = file.isDirectory() ? "folder" : "generic";
-			response.getWriter().println("<tr><td valign=\"top\"><img src=\"/-cp/images/" + icon + ".png\" alt=\"[" + type + "]\"></td><td><a href=\"" + href + "\">" + name + "</a></td><td align=\"right\">" + time + "</td><td align=\"right\">  - </td><td>&nbsp;</td></tr>");
+			String size = getSize(file);
+			response.getWriter().println("<tr><td valign=\"top\"><img src=\"/-cp/images/" + icon + ".png\" alt=\"[" + type + "]\"></td><td><a href=\"" + href + "\">" + name + "</a></td><td align=\"right\">" + time + "</td><td align=\"right\">  " + size + " </td><td>&nbsp;</td></tr>");
+		}
+	}
+	
+	private String getSize(File file) {
+		if (file.isDirectory()) {
+			return "-";
+		}
+		float length = file.length();
+		if (length < 1024) {
+			return String.format("%.1fB", (float)length);
+		} else if (length < 1024 * 1024) {
+			return String.format("%.1fK", (float)(length / 1024F));
+		} else if (length < 1024 * 1024 * 1024) {
+			return String.format("%.1fM", (float)(length / 1024F / 1024F));
+		} else {
+			return String.format("%.1fG", (float)(length / 1024F / 1024F / 1024F));
 		}
 	}
 
