@@ -1,5 +1,7 @@
 package cn.batchfile.getty.configuration;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * 系统基本设置
  * @author htlu
@@ -12,10 +14,19 @@ public class Configuration {
 	private int maxIdleTime = -1;
 	private String logLevel = "INFO";
 	private String baseDirectory;
-	private String contextPath = "";
+	private String contextPath = StringUtils.EMPTY;
 	private int requestHeaderSize = -1;
 	private int maxQueued = 1;
-	
+	private String webRoot = "/webapp";
+	private String fileEncoding = "UTF-8";
+	private String charset = "UTF-8";
+	private boolean allowListDirectory = true;
+	private String[] indexPages = new String[] {
+		"index.html", 
+		"index.htm", 
+		"index.groovy"
+	};
+
 	/**
 	 * 端口
 	 * @return 端口
@@ -158,5 +169,85 @@ public class Configuration {
 	 */
 	public void setMaxQueued(int maxQueued) {
 		this.maxQueued = maxQueued;
+	}
+
+	/**
+	 * Web Root
+	 * @return Web Root
+	 */
+	public String getWebRoot() {
+		return webRoot;
+	}
+
+	/**
+	 * Web Root
+	 * @param webRoot Web Root
+	 */
+	public void setWebRoot(String webRoot) {
+		this.webRoot = webRoot;
+	}
+
+	/**
+	 * File encoding
+	 * @return File encoding
+	 */
+	public String getFileEncoding() {
+		return fileEncoding;
+	}
+
+	/**
+	 * File encoding
+	 * @param fileEncoding File encoding
+	 */
+	public void setFileEncoding(String fileEncoding) {
+		this.fileEncoding = fileEncoding;
+	}
+
+	/**
+	 * Charset
+	 * @return Charset
+	 */
+	public String getCharset() {
+		return charset;
+	}
+
+	/**
+	 * Charset
+	 * @param charset Charset
+	 */
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
+
+	/**
+	 * Allow List Directory
+	 * @return Allow List Directory
+	 */
+	public boolean isAllowListDirectory() {
+		return allowListDirectory;
+	}
+
+	/**
+	 * Allow List Directory
+	 * @param allowListDirectory Allow List Directory
+	 */
+	public void setAllowListDirectory(boolean allowListDirectory) {
+		this.allowListDirectory = allowListDirectory;
+	}
+
+	/**
+	 * Index Pages
+	 * @return Index Pages
+	 */
+	public String[] getIndexPages() {
+		return indexPages;
+	}
+
+	/**
+	 * Index Pages
+	 * @param indexPages Index Pages
+	 */
+	public void setIndexPages(String[] indexPages) {
+		this.indexPages = indexPages;
 	}
 }

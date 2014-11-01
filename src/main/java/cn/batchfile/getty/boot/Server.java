@@ -11,34 +11,40 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import cn.batchfile.getty.configuration.Configuration;
 import cn.batchfile.getty.filter.GettyFilter;
+import cn.batchfile.getty.mvc.RequestMapping;
 import cn.batchfile.getty.servlet.GettyServlet;
 
 /**
  * Getty服务
+ * 
  * @author htlu
  *
  */
 public class Server {
 	private static final Logger logger = Logger.getLogger(Server.class);
-	
+
 	/**
 	 * 启动服务
-	 * @param configuration 设置
+	 * 
+	 * @param configuration
+	 *            设置
 	 */
 	public void start(Configuration configuration) {
-		logger.info(String.format("<Getty startup at port %d>", configuration.getPort()));
+		logger.info(String.format("<Getty startup at port %d>",
+				configuration.getPort()));
 
 		SelectChannelConnector connector = new SelectChannelConnector();
 		connector.setPort(configuration.getPort());
-		if (configuration.getMaxIdleTime() > 0) { 
+		if (configuration.getMaxIdleTime() > 0) {
 			connector.setMaxIdleTime(configuration.getMaxIdleTime());
 		}
 		if (configuration.getRequestHeaderSize() > 0) {
-			connector.setRequestHeaderSize(configuration.getRequestHeaderSize());
+			connector
+					.setRequestHeaderSize(configuration.getRequestHeaderSize());
 		}
-		
-		QueuedThreadPool threadPool =  new QueuedThreadPool();
-		if (configuration.getMaxIdleTime() > 0) { 
+
+		QueuedThreadPool threadPool = new QueuedThreadPool();
+		if (configuration.getMaxIdleTime() > 0) {
 			threadPool.setMaxIdleTimeMs(configuration.getMaxIdleTime());
 		}
 		if (configuration.getMaxQueued() > 0) {
@@ -52,27 +58,44 @@ public class Server {
 		}
 		threadPool.setName("getty-http");
 		connector.setThreadPool(threadPool);
-		
-		final org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(configuration.getPort());
+
+		final org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(
+				configuration.getPort());
 		server.setConnectors(new Connector[] { connector });
+
+		ServletContextHandler context = new ServletContextHandler(server,
+				configuration.getContextPath());
+		/*
+		 * final URL warUrl = new File(webPath).toURI().toURL(); final String
+		 * warUrlString = warUrl.toExternalForm(); ServletContextHandler context
+		 * = new WebAppContext(warUrlString, contextPath);
+		 * server.setHandler(context);
+		 */
+
+		//add filter
+		context.addFilter(new FilterHolder(new GettyFilter()), "/",
+				FilterMapping.DEFAULT);
 		
-		ServletContextHandler context = new ServletContextHandler(server, configuration.getContextPath());
-		context.addFilter(new FilterHolder(new GettyFilter()), "/", FilterMapping.DEFAULT);
-		context.addServlet(new ServletHolder(new GettyServlet()), "/");
-		
-        try {
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        server.start();
-                        server.join();
-                    } catch (Exception e) {
-                        logger.error("Error when start Getty", e);
-                    }
-                }
-            }).start();
-        } catch (Exception e) {
-            logger.error("Error when start Getty", e);
-        }
+		//add servlet
+		RequestMapping mapping = new RequestMapping();
+		mapping.setConfiguration(configuration);
+		GettyServlet servlet = new GettyServlet();
+		servlet.setRequestMapping(mapping);
+		context.addServlet(new ServletHolder(servlet), "/");
+
+		try {
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						server.start();
+						server.join();
+					} catch (Exception e) {
+						logger.error("Error when start Getty", e);
+					}
+				}
+			}).start();
+		} catch (Exception e) {
+			logger.error("Error when start Getty", e);
+		}
 	}
 }

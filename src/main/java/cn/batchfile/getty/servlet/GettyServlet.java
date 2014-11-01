@@ -1,18 +1,37 @@
 package cn.batchfile.getty.servlet;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import cn.batchfile.getty.exceptions.ListDirectoryNotAllowedException;
+import cn.batchfile.getty.mvc.RequestMapping;
+import cn.batchfile.getty.parser.DirectoryParser;
+import cn.batchfile.getty.parser.GroovyParser;
+import cn.batchfile.getty.parser.Parser;
+import cn.batchfile.getty.parser.StaticParser;
+
 public class GettyServlet implements Servlet {
-	
+
 	private static final Logger logger = Logger.getLogger(GettyServlet.class);
+	private RequestMapping requestMapping;
+	private Map<String, Parser> parsers = new HashMap<String, Parser>();
+
+	public void setRequestMapping(RequestMapping requestMapping) {
+		this.requestMapping = requestMapping;
+	}
 
 	@Override
 	public void destroy() {
@@ -34,15 +53,41 @@ public class GettyServlet implements Servlet {
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
-		// pass
-
+		//init parsers
+		parsers.put("static", new StaticParser());
+		parsers.put("dir", new DirectoryParser());
+		parsers.put("groovy", new GroovyParser());
 	}
 
 	@Override
 	public void service(ServletRequest request, ServletResponse response)
 			throws ServletException, IOException {
-		
-		logger.debug("Dispatch servlet work");
-	}
 
+		logger.debug("Dispatch servlet work");
+		HttpServletRequest h_request = (HttpServletRequest)request;
+		HttpServletResponse h_response = (HttpServletResponse)response; 
+		File file = null;
+		try {
+			file = requestMapping.mapping(h_request);
+		} catch (ListDirectoryNotAllowedException e) {
+			h_response.sendError(401, "Directory list not allowed");
+		}
+		
+		if (!file.exists()) {
+			h_response.sendError(404);
+			return;
+		}
+		
+		dispatch(file, h_request, h_response);
+	}
+	
+	private void dispatch(File file, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		if (file.isDirectory()) {
+			parsers.get("dir").parse(file, request, response);
+		} else if (StringUtils.endsWith(file.getName(), Parser.GROOVY_EXTENSION)) {
+			parsers.get("groovy").parse(file, request, response);
+		} else {
+			parsers.get("static").parse(file, request, response);
+		}
+	}
 }
