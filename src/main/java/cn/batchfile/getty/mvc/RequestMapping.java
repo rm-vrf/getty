@@ -56,7 +56,11 @@ public class RequestMapping {
 					return f;
 				}
 			}
-			throw new ListDirectoryNotAllowedException();
+			if (configuration.isAllowListDirectory()) {
+				return file;
+			} else {
+				throw new ListDirectoryNotAllowedException();
+			}
 		} else {
 			return file;
 		}
