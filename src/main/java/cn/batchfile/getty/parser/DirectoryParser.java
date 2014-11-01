@@ -66,7 +66,9 @@ public class DirectoryParser extends Parser {
 			return "-";
 		}
 		float length = file.length();
-		if (length < 1024) {
+		if (length == 0) {
+			return "0B";
+		} else if (length < 1024) {
 			return String.format("%.1fB", (float)length);
 		} else if (length < 1024 * 1024) {
 			return String.format("%.1fK", (float)(length / 1024F));

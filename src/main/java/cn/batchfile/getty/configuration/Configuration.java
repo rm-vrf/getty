@@ -20,6 +20,7 @@ public class Configuration {
 	private String webRoot = "/webapp";
 	private String fileEncoding = "UTF-8";
 	private String charset = "UTF-8";
+	private String uriEncoding = "UTF-8";
 	private boolean allowListDirectory = true;
 	private String[] indexPages = new String[] {
 		"index.html", 
@@ -217,6 +218,22 @@ public class Configuration {
 	 */
 	public void setCharset(String charset) {
 		this.charset = charset;
+	}
+
+	/**
+	 * URI Encoding
+	 * @return URI Encoding
+	 */
+	public String getUriEncoding() {
+		return uriEncoding;
+	}
+
+	/**
+	 * URI Encoding
+	 * @param uriEncoding URI Encoding
+	 */
+	public void setUriEncoding(String uriEncoding) {
+		this.uriEncoding = uriEncoding;
 	}
 
 	/**

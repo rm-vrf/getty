@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +33,11 @@ public class RequestMapping {
 		String uri = request.getRequestURI();
 		String context = configuration.getContextPath();
 		uri = StringUtils.substring(uri, context.length());
+		try {
+			uri = URLDecoder.decode(uri, configuration.getUriEncoding());
+		} catch (UnsupportedEncodingException e) {
+			//pass
+		}
 		
 		if (StringUtils.startsWith(uri, CLASSPATH_PREFIX)) {
 			return findClasspathResource(StringUtils.substring(uri, CLASSPATH_PREFIX.length()));
