@@ -57,7 +57,7 @@ public class GroovyParser extends Parser {
 			stream = new FileInputStream(file);
 			List<String> lines = IOUtils.readLines(stream, configuration.fileEncoding());
 			String scriptText = StringUtils.join(lines, IOUtils.LINE_SEPARATOR);
-			Object r = shell.evaluate(scriptText, file.getName(), configuration.fileEncoding());
+			Object r = shell.evaluate(scriptText, file.getName());
 			if (logger.isDebugEnabled()) {
 				logger.debug("shell return value: " + r);
 			}
@@ -65,10 +65,8 @@ public class GroovyParser extends Parser {
 			IOUtils.closeQuietly(stream);
 		}
 		
-		
 		//process content-type
 		if (StringUtils.isEmpty(response.getContentType())) {
-			response.addHeader("Content-Type", "text/html;charset=" + configuration.charset());
 			response.setContentType("text/html");
 		}
 	}
