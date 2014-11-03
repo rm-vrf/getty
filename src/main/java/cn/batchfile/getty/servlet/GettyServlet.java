@@ -29,8 +29,9 @@ public class GettyServlet implements Servlet {
 	private RequestMapping requestMapping;
 	private Map<String, Parser> parsers = new HashMap<String, Parser>();
 
-	public void setRequestMapping(RequestMapping requestMapping) {
+	public GettyServlet requestMapping(RequestMapping requestMapping) {
 		this.requestMapping = requestMapping;
+		return this;
 	}
 
 	@Override
@@ -54,9 +55,9 @@ public class GettyServlet implements Servlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		//init parsers
-		parsers.put("static", new StaticParser());
-		parsers.put("dir", new DirectoryParser());
-		parsers.put("groovy", new GroovyParser());
+		parsers.put("static", new StaticParser(requestMapping.configuration()));
+		parsers.put("dir", new DirectoryParser(requestMapping.configuration()));
+		parsers.put("groovy", new GroovyParser(requestMapping.configuration()));
 	}
 
 	@Override

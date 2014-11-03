@@ -2,6 +2,7 @@ package cn.batchfile.getty;
 
 import java.io.File;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -15,7 +16,7 @@ public class Main {
 	private static final Logger logger = Logger.getLogger(Main.class);
 
 	public static void main(String[] args) {
-		String n = System.getProperty("line.seperator", "\r\n");
+		String n = IOUtils.LINE_SEPARATOR;
 		String log = n;
 		log += "  ____      _   _" + n;
 		log += " / ___| ___| |_| |_ _   _" + n;

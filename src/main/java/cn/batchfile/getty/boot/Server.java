@@ -78,9 +78,9 @@ public class Server {
 		
 		//add servlet
 		RequestMapping mapping = new RequestMapping();
-		mapping.setConfiguration(configuration);
+		mapping.configuration(configuration);
 		GettyServlet servlet = new GettyServlet();
-		servlet.setRequestMapping(mapping);
+		servlet.requestMapping(mapping);
 		context.addServlet(new ServletHolder(servlet), "/");
 
 		try {

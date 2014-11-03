@@ -11,13 +11,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 
+import cn.batchfile.getty.configuration.Configuration;
+
 public class StaticParser extends Parser {
 
+	private Configuration configuration;
+	
+	public StaticParser(Configuration configuration) {
+		this.configuration = configuration;
+	}
+	
 	@Override
 	public void parse(File file, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		
-		//TODO 静态内容要处理Mime type，给一个正确的消息头：Content-Type: text/html;charset=UTF-8
+		//TODO 静态内容要处理Mime type，给一个正确的消息头：Content-Type: text/html
+		response.setCharacterEncoding(configuration.charset());
 		
 		InputStream stream = null;
 		try {

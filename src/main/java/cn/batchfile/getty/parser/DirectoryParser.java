@@ -9,15 +9,24 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 
+import cn.batchfile.getty.configuration.Configuration;
+
 public class DirectoryParser extends Parser {
 	
 	private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	private Configuration configuration;
+	
+	public DirectoryParser(Configuration configuration) {
+		this.configuration = configuration;
+	}
 	
 	@Override
 	public void parse(File dir, HttpServletRequest request,
 			HttpServletResponse response) throws IOException{
 		
-		response.addHeader("Content-Type", "text/html;charset=UTF-8");
+		response.addHeader("Content-Type", "text/html;charset=" + configuration.charset());
+		response.setContentType("text/html");
+		response.setCharacterEncoding(configuration.charset());
 		
 		head(dir, request, response);
 		body(dir, request, response);

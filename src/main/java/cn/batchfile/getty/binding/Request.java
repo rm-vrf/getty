@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 
 public class Request {
 	private static final Logger logger = Logger.getLogger(Request.class);
-	private static final String LINE_SEP = System.getProperty("line.separator", "\r\n");
 	private HttpServletRequest servletRequest;
 	private Map<String, Object> params = new HashMap<String, Object>();
 	private boolean paramsInited = false;
@@ -60,7 +59,7 @@ public class Request {
 			try {
 				stream = servletRequest.getInputStream();
 				List<String> lines = IOUtils.readLines(stream);
-				body = StringUtils.join(lines, LINE_SEP);
+				body = StringUtils.join(lines, IOUtils.LINE_SEPARATOR);
 			} finally {
 				IOUtils.closeQuietly(stream);
 			}

@@ -4,16 +4,31 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
 import cn.batchfile.getty.binding.Request;
 import cn.batchfile.getty.binding.Response;
+import cn.batchfile.getty.configuration.Configuration;
 
 public class GroovyParser extends Parser {
+	
+	private static final Logger logger = Logger.getLogger(GroovyParser.class);
+	private Configuration configuration;
+	
+	public GroovyParser(Configuration configuration) {
+		this.configuration = configuration;
+	}
 
 	@Override
 	public void parse(File file, HttpServletRequest request,
@@ -31,9 +46,30 @@ public class GroovyParser extends Parser {
 		for (Entry<String, Object> entry : _request.parameters().entrySet()) {
 			binding.setVariable(entry.getKey(), entry.getValue());
 		}
+		
+		//set response charset
+		response.setCharacterEncoding(configuration.charset());
 
 		//execute script file
 		GroovyShell shell = new GroovyShell(binding);
-		shell.evaluate(file);
+		InputStream stream = null;
+		try {
+			stream = new FileInputStream(file);
+			List<String> lines = IOUtils.readLines(stream, configuration.fileEncoding());
+			String scriptText = StringUtils.join(lines, IOUtils.LINE_SEPARATOR);
+			Object r = shell.evaluate(scriptText, file.getName(), configuration.fileEncoding());
+			if (logger.isDebugEnabled()) {
+				logger.debug("shell return value: " + r);
+			}
+		} finally {
+			IOUtils.closeQuietly(stream);
+		}
+		
+		
+		//process content-type
+		if (StringUtils.isEmpty(response.getContentType())) {
+			response.addHeader("Content-Type", "text/html;charset=" + configuration.charset());
+			response.setContentType("text/html");
+		}
 	}
 }

@@ -25,8 +25,13 @@ public class RequestMapping {
 	private Map<String, File> classpathFiles = new ConcurrentHashMap<String, File>();
 	private Configuration configuration;
 	
-	public void setConfiguration(Configuration configuration) {
+	public Configuration configuration() {
+		return configuration;
+	}
+	
+	public RequestMapping configuration(Configuration configuration) {
 		this.configuration = configuration;
+		return this;
 	}
 
 	public File mapping(HttpServletRequest request) {
