@@ -16,10 +16,8 @@ import org.apache.log4j.Logger;
 public class Request {
 	private static final Logger logger = Logger.getLogger(Request.class);
 	private HttpServletRequest servletRequest;
-	private Map<String, Object> params = new HashMap<String, Object>();
-	private boolean paramsInited = false;
 	private String body;
-	private boolean bodyInited = false;
+	private boolean bodyInited;
 	
 	public Request(HttpServletRequest servletRequest) throws IOException {
 		this.servletRequest = servletRequest;
@@ -29,23 +27,51 @@ public class Request {
 		return servletRequest.getRequestURI();
 	}
 	
+	public String contentType() {
+		return servletRequest.getContentType();
+	}
+	
+	public String charset() {
+		return servletRequest.getCharacterEncoding();
+	}
+	
+	public String header(String name) {
+		return servletRequest.getHeader(name);
+	}
+	
+	public Map<String, String> headers() {
+		Map<String, String> headers = new HashMap<String, String>();
+		@SuppressWarnings("unchecked")
+		Enumeration<String> names = servletRequest.getHeaderNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			String value = servletRequest.getHeader(name);
+			headers.put(name, value);
+		}
+		return headers;
+	}
+	
 	public Object parameter(String name) {
-		return parameters().get(name);
+		String[] value = servletRequest.getParameterValues(name);
+		if (value != null && value.length == 1) {
+			return value[0];
+		} else {
+			return value;
+		}
 	}
 	
 	public Map<String, Object> parameters() {
 		if (logger.isDebugEnabled()) {
 			logger.debug("content-type is: " + servletRequest.getContentType());
 		}
-		if (!paramsInited) {
-			@SuppressWarnings("unchecked")
-			Enumeration<String> names = servletRequest.getParameterNames();
-			while (names.hasMoreElements()) {
-				String name = names.nextElement();
-				Object value = servletRequest.getParameter(name);
-				params.put(name, value);
-			}
-			paramsInited = true;
+		Map<String, Object> params = new HashMap<String, Object>();
+		
+		@SuppressWarnings("unchecked")
+		Enumeration<String> names = servletRequest.getParameterNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			Object value = parameter(name);
+			params.put(name, value);
 		}
 		return params;
 	}
@@ -58,7 +84,7 @@ public class Request {
 			InputStream stream = null;
 			try {
 				stream = servletRequest.getInputStream();
-				List<String> lines = IOUtils.readLines(stream);
+				List<String> lines = IOUtils.readLines(stream, charset());
 				body = StringUtils.join(lines, IOUtils.LINE_SEPARATOR);
 			} finally {
 				IOUtils.closeQuietly(stream);

@@ -39,8 +39,8 @@ public class GroovyParser extends Parser {
 		Response _response = new Response(response);
 		
 		Binding binding = new Binding();
-		binding.setProperty("_request", _request);
-		binding.setProperty("_response", _response);
+		binding.setProperty("request", _request);
+		binding.setProperty("response", _response);
 		
 		//binding input param
 		for (Entry<String, Object> entry : _request.parameters().entrySet()) {

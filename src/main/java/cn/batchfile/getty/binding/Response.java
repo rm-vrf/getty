@@ -12,11 +12,36 @@ public class Response {
 		this.servletResponse = servletResponse;
 	}
 	
-	public void print(Object object) throws IOException {
-		servletResponse.getWriter().print(object);
+	public String contentType() {
+		return servletResponse.getContentType();
 	}
 	
-	public void println(Object object) throws IOException {
+	public Response contentType(String contentType) {
+		servletResponse.setContentType(contentType);
+		return this;
+	}
+	
+	public String charset() {
+		return servletResponse.getCharacterEncoding();
+	}
+	
+	public Response charset(String charset) {
+		servletResponse.setCharacterEncoding(charset);
+		return this;
+	}
+	
+	public Response header(String name, String value) {
+		servletResponse.addHeader(name, value);
+		return this;
+	}
+	
+	public Response print(Object object) throws IOException {
+		servletResponse.getWriter().print(object);
+		return this;
+	}
+	
+	public Response println(Object object) throws IOException {
 		servletResponse.getWriter().println(object);
+		return this;
 	}
 }

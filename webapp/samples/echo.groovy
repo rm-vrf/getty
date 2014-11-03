@@ -1,2 +1,2 @@
-_response.println 'Hello world!'
-_response.println '你好世界'
+response.println 'Hello world!'
+response.println '你好世界'
