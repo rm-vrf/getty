@@ -17,8 +17,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import cn.batchfile.getty.binding.Cookie;
 import cn.batchfile.getty.binding.Request;
 import cn.batchfile.getty.binding.Response;
+import cn.batchfile.getty.binding.Session;
 import cn.batchfile.getty.configuration.Configuration;
 
 public class GroovyParser extends Parser {
@@ -32,15 +34,19 @@ public class GroovyParser extends Parser {
 
 	@Override
 	public void parse(File file, HttpServletRequest request,
-			HttpServletResponse response) throws IOException{
+			HttpServletResponse response) throws IOException {
 		
 		//binding object
 		Request _request = new Request(request);
 		Response _response = new Response(response);
+		Session _session = new Session(request);
+		Cookie _cookie = new Cookie(request, response);
 		
 		Binding binding = new Binding();
 		binding.setProperty("request", _request);
 		binding.setProperty("response", _response);
+		binding.setProperty("session", _session);
+		binding.setProperty("cookie", _cookie);
 		
 		//binding input param
 		for (Entry<String, Object> entry : _request.parameters().entrySet()) {
