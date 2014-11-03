@@ -1,1 +1,1 @@
-Hello, ${person.name}.
+Hello, ${person.name}, age: ${person.age}
