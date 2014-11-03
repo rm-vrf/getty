@@ -41,12 +41,14 @@ public class GroovyParser extends Parser {
 		Response _response = new Response(response);
 		Session _session = new Session(request);
 		Cookie _cookie = new Cookie(request, response);
+		Logger _log = Logger.getLogger(file.getName());
 		
 		Binding binding = new Binding();
 		binding.setProperty("request", _request);
 		binding.setProperty("response", _response);
 		binding.setProperty("session", _session);
 		binding.setProperty("cookie", _cookie);
+		binding.setProperty("log", _log);
 		
 		//binding input param
 		for (Entry<String, Object> entry : _request.parameters().entrySet()) {
