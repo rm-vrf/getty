@@ -11,8 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 public class Request {
+	private static final Logger logger = Logger.getLogger(Request.class);
 	private static final String LINE_SEP = System.getProperty("line.separator", "\r\n");
 	private HttpServletRequest servletRequest;
 	private Map<String, Object> params = new HashMap<String, Object>();
@@ -33,6 +35,9 @@ public class Request {
 	}
 	
 	public Map<String, Object> parameters() {
+		if (logger.isDebugEnabled()) {
+			logger.debug("content-type is: " + servletRequest.getContentType());
+		}
 		if (!paramsInited) {
 			@SuppressWarnings("unchecked")
 			Enumeration<String> names = servletRequest.getParameterNames();
@@ -47,6 +52,9 @@ public class Request {
 	}
 	
 	public String body() throws IOException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("content-type is: " + servletRequest.getContentType());
+		}
 		if (!bodyInited) {
 			InputStream stream = null;
 			try {
