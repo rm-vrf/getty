@@ -18,9 +18,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import cn.batchfile.getty.binding.Cookie;
+import cn.batchfile.getty.binding.Model;
 import cn.batchfile.getty.binding.Request;
 import cn.batchfile.getty.binding.Response;
 import cn.batchfile.getty.binding.Session;
+import cn.batchfile.getty.binding.View;
 import cn.batchfile.getty.configuration.Configuration;
 
 public class GroovyParser extends Parser {
@@ -41,6 +43,8 @@ public class GroovyParser extends Parser {
 		Response _response = new Response(response);
 		Session _session = new Session(request);
 		Cookie _cookie = new Cookie(request, response);
+		Model _model = new Model(request);
+		View _view = new View(request, response);
 		Logger _logger = Logger.getLogger(file.getName());
 		
 		Binding binding = new Binding();
@@ -48,6 +52,8 @@ public class GroovyParser extends Parser {
 		binding.setProperty("_response", _response);
 		binding.setProperty("_session", _session);
 		binding.setProperty("_cookie", _cookie);
+		binding.setProperty("_model", _model);
+		binding.setProperty("_view", _view);
 		binding.setProperty("_logger", _logger);
 		
 		//binding input param

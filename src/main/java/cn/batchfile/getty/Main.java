@@ -33,8 +33,8 @@ public class Main {
 		//set base directory
 		File file = new File(".");
 		String path = file.getAbsolutePath();
-		if (StringUtils.endsWith(path, "/.")) {
-			path = StringUtils.substring(path, 0, path.length() - "/.".length());
+		if (StringUtils.endsWith(path, File.separator + ".")) {
+			path = StringUtils.substring(path, 0, path.length() - (File.separator + ".").length());
 		}
 		configuration.baseDirectory(path);
 		

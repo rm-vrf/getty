@@ -1,5 +1,9 @@
 package cn.batchfile.getty.boot;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
@@ -8,6 +12,7 @@ import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 import cn.batchfile.getty.configuration.Configuration;
 import cn.batchfile.getty.filter.GettyFilter;
@@ -39,8 +44,7 @@ public class Server {
 			connector.setMaxIdleTime(configuration.maxIdleTime());
 		}
 		if (configuration.requestHeaderSize() > 0) {
-			connector
-					.setRequestHeaderSize(configuration.requestHeaderSize());
+			connector.setRequestHeaderSize(configuration.requestHeaderSize());
 		}
 
 		QueuedThreadPool threadPool = new QueuedThreadPool();
@@ -63,25 +67,31 @@ public class Server {
 				configuration.port());
 		server.setConnectors(new Connector[] { connector });
 
-		ServletContextHandler context = new ServletContextHandler(server,
+		// Servlet ContextHandler context = new ServletContextHandler(server,
+		// configuration.contextPath());
+		URL warUrl = null;
+		try {
+			warUrl = new File(configuration.baseDirectory()
+					+ configuration.webRoot()).toURI().toURL();
+		} catch (MalformedURLException e) {
+			logger.error(e.getMessage(), e);
+			return;
+		}
+		final String warUrlString = warUrl.toExternalForm();
+		ServletContextHandler context = new WebAppContext(warUrlString,
 				configuration.contextPath());
-		/*
-		 * final URL warUrl = new File(webPath).toURI().toURL(); final String
-		 * warUrlString = warUrl.toExternalForm(); ServletContextHandler context
-		 * = new WebAppContext(warUrlString, contextPath);
-		 * server.setHandler(context);
-		 */
+		server.setHandler(context);
 
-		//add filter
+		// add filter
 		context.addFilter(new FilterHolder(new GettyFilter()), "/",
 				FilterMapping.DEFAULT);
-		
-		//add servlet
+
+		// add servlet
 		RequestMapping mapping = new RequestMapping();
 		mapping.configuration(configuration);
 		GettyServlet servlet = new GettyServlet();
 		servlet.requestMapping(mapping);
-		context.addServlet(new ServletHolder(servlet), "/");
+		context.addServlet(new ServletHolder(servlet), "*.groovy");
 
 		try {
 			new Thread(new Runnable() {

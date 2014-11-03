@@ -44,4 +44,12 @@ public class Response {
 		servletResponse.getWriter().println(object);
 		return this;
 	}
+	
+	public void error(int code, String message) throws IOException {
+		servletResponse.sendError(code, message);
+	}
+
+	public void error(int code) throws IOException {
+		servletResponse.sendError(code);
+	}
 }

@@ -24,7 +24,6 @@ public class DirectoryParser extends Parser {
 	public void parse(File dir, HttpServletRequest request,
 			HttpServletResponse response) throws IOException{
 		
-		//response.addHeader("Content-Type", "text/html;charset=" + configuration.charset());
 		response.setContentType("text/html");
 		response.setCharacterEncoding(configuration.charset());
 		
