@@ -2,6 +2,7 @@ package cn.batchfile.getty.binding;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,11 +34,12 @@ public class Request {
 	
 	public Map<String, Object> parameters() {
 		if (!paramsInited) {
-			@SuppressWarnings("rawtypes")
-			Map map = servletRequest.getParameterMap();
-			for (Object key : map.keySet()) {
-				Object value = map.get(key);
-				params.put(key.toString(), value);
+			@SuppressWarnings("unchecked")
+			Enumeration<String> names = servletRequest.getParameterNames();
+			while (names.hasMoreElements()) {
+				String name = names.nextElement();
+				Object value = servletRequest.getParameter(name);
+				params.put(name, value);
 			}
 			paramsInited = true;
 		}
