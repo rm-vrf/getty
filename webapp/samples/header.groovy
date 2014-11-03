@@ -1,4 +1,4 @@
-response.println('request headers: ' + request.headers())
-response.println('request accept: ' + request.header('Accept'))
+_response.println('request headers: ' + _request.headers())
+_response.println('request accept: ' + _request.header('Accept'))
 
-response.header('x-request-name', 'header')
+_response.header('x-request-name', 'header')

@@ -1,4 +1,4 @@
-response.println 'name: ' + name
-response.println 'name again: ' + request.parameter('name')
-response.println 'parameters: ' + request.parameters()
-response.println 'body: ' + request.body()
+_response.println 'name: ' + name
+_response.println 'name again: ' + _request.parameter('name')
+_response.println 'parameters: ' + _request.parameters()
+_response.println 'body: ' + _request.body()

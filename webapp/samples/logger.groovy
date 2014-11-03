@@ -1,2 +1,2 @@
-log.info('this is log writed by groovy!')
-response.println('See log file.')
+_logger.info('this is log writed by groovy!')
+_response.println('See log file.')
