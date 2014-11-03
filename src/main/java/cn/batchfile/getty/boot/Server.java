@@ -31,40 +31,40 @@ public class Server {
 	 */
 	public void start(Configuration configuration) {
 		logger.info(String.format("<Getty startup at port %d>",
-				configuration.getPort()));
+				configuration.port()));
 
 		SelectChannelConnector connector = new SelectChannelConnector();
-		connector.setPort(configuration.getPort());
-		if (configuration.getMaxIdleTime() > 0) {
-			connector.setMaxIdleTime(configuration.getMaxIdleTime());
+		connector.setPort(configuration.port());
+		if (configuration.maxIdleTime() > 0) {
+			connector.setMaxIdleTime(configuration.maxIdleTime());
 		}
-		if (configuration.getRequestHeaderSize() > 0) {
+		if (configuration.requestHeaderSize() > 0) {
 			connector
-					.setRequestHeaderSize(configuration.getRequestHeaderSize());
+					.setRequestHeaderSize(configuration.requestHeaderSize());
 		}
 
 		QueuedThreadPool threadPool = new QueuedThreadPool();
-		if (configuration.getMaxIdleTime() > 0) {
-			threadPool.setMaxIdleTimeMs(configuration.getMaxIdleTime());
+		if (configuration.maxIdleTime() > 0) {
+			threadPool.setMaxIdleTimeMs(configuration.maxIdleTime());
 		}
-		if (configuration.getMaxQueued() > 0) {
-			threadPool.setMaxQueued(configuration.getMaxQueued());
+		if (configuration.maxQueued() > 0) {
+			threadPool.setMaxQueued(configuration.maxQueued());
 		}
-		if (configuration.getMaxThread() > 0) {
-			threadPool.setMaxThreads(configuration.getMaxThread());
+		if (configuration.maxThread() > 0) {
+			threadPool.setMaxThreads(configuration.maxThread());
 		}
-		if (configuration.getMinThread() > 0) {
-			threadPool.setMinThreads(configuration.getMinThread());
+		if (configuration.minThread() > 0) {
+			threadPool.setMinThreads(configuration.minThread());
 		}
 		threadPool.setName("getty-http");
 		connector.setThreadPool(threadPool);
 
 		final org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(
-				configuration.getPort());
+				configuration.port());
 		server.setConnectors(new Connector[] { connector });
 
 		ServletContextHandler context = new ServletContextHandler(server,
-				configuration.getContextPath());
+				configuration.contextPath());
 		/*
 		 * final URL warUrl = new File(webPath).toURI().toURL(); final String
 		 * warUrlString = warUrl.toExternalForm(); ServletContextHandler context

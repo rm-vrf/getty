@@ -35,7 +35,7 @@ public class Main {
 		if (StringUtils.endsWith(path, "/.")) {
 			path = StringUtils.substring(path, 0, path.length() - "/.".length());
 		}
-		configuration.setBaseDirectory(path);
+		configuration.baseDirectory(path);
 		
 		server.start(configuration);
 	}

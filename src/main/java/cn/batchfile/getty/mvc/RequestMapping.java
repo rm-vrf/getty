@@ -31,10 +31,10 @@ public class RequestMapping {
 
 	public File mapping(HttpServletRequest request) {
 		String uri = request.getRequestURI();
-		String context = configuration.getContextPath();
+		String context = configuration.contextPath();
 		uri = StringUtils.substring(uri, context.length());
 		try {
-			uri = URLDecoder.decode(uri, configuration.getUriEncoding());
+			uri = URLDecoder.decode(uri, configuration.uriEncoding());
 		} catch (UnsupportedEncodingException e) {
 			//pass
 		}
@@ -43,7 +43,7 @@ public class RequestMapping {
 			return findClasspathResource(StringUtils.substring(uri, CLASSPATH_PREFIX.length()));
 		}
 		
-		String path = configuration.getBaseDirectory() + configuration.getWebRoot() + uri;
+		String path = configuration.baseDirectory() + configuration.webRoot() + uri;
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("mapping uri: %s to: %s", uri, path));
 		}
@@ -52,18 +52,18 @@ public class RequestMapping {
 		
 		//如果是目录，寻找目录中的默认文档
 		if (file.isDirectory()) {
-			if (!configuration.isAllowListDirectory()) {
+			if (!configuration.allowListDirectory()) {
 				throw new ListDirectoryNotAllowedException();
 			}
 			
-			for (String indexPage : configuration.getIndexPages()) {
+			for (String indexPage : configuration.indexPages()) {
 				String page = file.getAbsolutePath() + "/" + indexPage;
 				File f = new File(page);
 				if (f.exists()) {
 					return f;
 				}
 			}
-			if (configuration.isAllowListDirectory()) {
+			if (configuration.allowListDirectory()) {
 				return file;
 			} else {
 				throw new ListDirectoryNotAllowedException();
