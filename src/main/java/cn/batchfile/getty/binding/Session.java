@@ -13,6 +13,10 @@ public class Session {
 	public Session(HttpServletRequest request) {
 		this.request = request;
 	}
+	
+	public String id() {
+		return request.getRequestedSessionId();
+	}
 
 	public Session set(String name, Object value) {
 		request.getSession(true).setAttribute(name, value);

@@ -2,9 +2,11 @@ package cn.batchfile.getty.binding;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,8 +21,74 @@ public class Request {
 	private String body;
 	private boolean bodyInited;
 	
-	public Request(HttpServletRequest servletRequest) throws IOException {
+	public Request(HttpServletRequest servletRequest) {
 		this.servletRequest = servletRequest;
+	}
+	
+	public String method() {
+		return servletRequest.getMethod();
+	}
+	
+	public String queryString() {
+		return servletRequest.getQueryString();
+	}
+	
+	public int contentLength() {
+		return servletRequest.getContentLength();
+	}
+	
+	public String locale() {
+		return servletRequest.getLocale().toString();
+	}
+	
+	public List<String> locales() {
+		List<String> list = new ArrayList<String>();
+		@SuppressWarnings("unchecked")
+		Enumeration<Locale> enums = servletRequest.getLocales();
+		while (enums.hasMoreElements()) {
+			list.add(enums.nextElement().toString());
+		}
+		return list;
+	}
+	
+	public String localAddress() {
+		return servletRequest.getLocalAddr();
+	}
+	
+	public String localName() {
+		return servletRequest.getLocalName();
+	}
+	
+	public int localPort() {
+		return servletRequest.getLocalPort();
+	}
+	
+	public String protocol() {
+		return servletRequest.getProtocol();
+	}
+	
+	public String remoteUser() {
+		return servletRequest.getRemoteUser();
+	}
+	
+	public String remoteAddress() {
+		return servletRequest.getRemoteAddr();
+	}
+	
+	public String remoteHost() {
+		return servletRequest.getRemoteHost();
+	}
+	
+	public String serverName() {
+		return servletRequest.getServerName();
+	}
+	
+	public int serverPort() {
+		return servletRequest.getServerPort();
+	}
+	
+	public String schema() {
+		return servletRequest.getScheme();
 	}
 	
 	public String uri() {
