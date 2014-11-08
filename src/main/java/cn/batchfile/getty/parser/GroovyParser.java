@@ -71,7 +71,8 @@ public class GroovyParser extends Parser {
 			stream = new FileInputStream(file);
 			List<String> lines = IOUtils.readLines(stream, configuration.fileEncoding());
 			String scriptText = StringUtils.join(lines, IOUtils.LINE_SEPARATOR);
-			Object r = shell.evaluate(scriptText, file.getName());
+			String base = configuration.baseDirectory() + File.separatorChar + configuration.webRoot();
+			Object r = shell.evaluate(scriptText, file.getName(), base);
 			if (logger.isDebugEnabled()) {
 				logger.debug("shell return value: " + r);
 			}

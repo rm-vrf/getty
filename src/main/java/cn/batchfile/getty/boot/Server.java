@@ -71,7 +71,7 @@ public class Server {
 		// configuration.contextPath());
 		URL warUrl = null;
 		try {
-			warUrl = new File(configuration.baseDirectory()
+			warUrl = new File(configuration.baseDirectory() + File.separatorChar
 					+ configuration.webRoot()).toURI().toURL();
 		} catch (MalformedURLException e) {
 			logger.error(e.getMessage(), e);
@@ -92,6 +92,7 @@ public class Server {
 		GettyServlet servlet = new GettyServlet();
 		servlet.requestMapping(mapping);
 		context.addServlet(new ServletHolder(servlet), "*.groovy");
+		context.setWelcomeFiles(configuration.indexPages());
 
 		try {
 			new Thread(new Runnable() {

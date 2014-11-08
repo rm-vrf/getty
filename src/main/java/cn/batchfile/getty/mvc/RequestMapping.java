@@ -48,7 +48,7 @@ public class RequestMapping {
 			return findClasspathResource(StringUtils.substring(uri, CLASSPATH_PREFIX.length()));
 		}
 		
-		String path = configuration.baseDirectory() + configuration.webRoot() + uri;
+		String path = configuration.baseDirectory() + File.separatorChar + configuration.webRoot() + uri;
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("mapping uri: %s to: %s", uri, path));
 		}
@@ -62,7 +62,7 @@ public class RequestMapping {
 			}
 			
 			for (String indexPage : configuration.indexPages()) {
-				String page = file.getAbsolutePath() + "/" + indexPage;
+				String page = file.getAbsolutePath() + File.separatorChar + indexPage;
 				File f = new File(page);
 				if (f.exists()) {
 					return f;

@@ -17,7 +17,7 @@ public class Configuration {
 	private String contextPath = StringUtils.EMPTY;
 	private int requestHeaderSize = -1;
 	private int maxQueued = 1;
-	private String webRoot = "/webapp";
+	private String webRoot = "webapp";
 	private String fileEncoding = "UTF-8";
 	private String charset = "UTF-8";
 	private String uriEncoding = "UTF-8";
