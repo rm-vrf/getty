@@ -34,16 +34,11 @@ if [ -r "$PRGDIR/setenv.sh" ]; then
   . "$PRGDIR/setenv.sh"
 fi
 
-if [ $JAVA_DIR ]; then
-  export JAVA_HOME=$JAVA_DIR
-  export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-fi
-
 LIB_DIR=$PRGDIR/lib:$PRGDIR/lib/optional
 WEB_ROOT=$PRGDIR/$WEB_ROOT
 JAR_FILE=$PRGDIR/getty.jar
 
-$JAVA_HOME/bin/java $JAVA_OPTS -Djava.ext.dirs=$LIB_DIR:$WEB_ROOT \
+java $JAVA_OPTS -Djava.ext.dirs=$LIB_DIR:$WEB_ROOT \
 -Dfile.encoding=$FILE_ENCODING \
 -Xbootclasspath/a:$WEB_ROOT \
 -jar $JAR_FILE \
