@@ -29,7 +29,6 @@ public class Session {
 	
 	public Map<String, Object> get() {
 		Map<String, Object> map = new HashMap<String, Object>();
-		@SuppressWarnings("unchecked")
 		Enumeration<String> names = request.getSession(true).getAttributeNames();
 		while (names.hasMoreElements()) {
 			String name = names.nextElement();

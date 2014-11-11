@@ -32,7 +32,6 @@ public class Model {
 	}
 	
 	public Map<String, Object> get() {
-		@SuppressWarnings("unchecked")
 		Enumeration<String> names = request.getAttributeNames();
 		Map<String, Object> map = new HashMap<String, Object>();
 		while (names.hasMoreElements()) {

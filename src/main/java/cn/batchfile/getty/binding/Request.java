@@ -43,7 +43,6 @@ public class Request {
 	
 	public List<String> locales() {
 		List<String> list = new ArrayList<String>();
-		@SuppressWarnings("unchecked")
 		Enumeration<Locale> enums = servletRequest.getLocales();
 		while (enums.hasMoreElements()) {
 			list.add(enums.nextElement().toString());
@@ -109,7 +108,6 @@ public class Request {
 	
 	public Map<String, String> headers() {
 		Map<String, String> headers = new HashMap<String, String>();
-		@SuppressWarnings("unchecked")
 		Enumeration<String> names = servletRequest.getHeaderNames();
 		while (names.hasMoreElements()) {
 			String name = names.nextElement();
@@ -134,7 +132,6 @@ public class Request {
 		}
 		Map<String, Object> params = new HashMap<String, Object>();
 		
-		@SuppressWarnings("unchecked")
 		Enumeration<String> names = servletRequest.getParameterNames();
 		while (names.hasMoreElements()) {
 			String name = names.nextElement();
