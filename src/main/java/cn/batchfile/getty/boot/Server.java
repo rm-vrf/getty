@@ -57,46 +57,6 @@ public class Server {
 		
 		// kick off
 		server.start();
-		
-//		URL warUrl = null;
-//		try {
-//			warUrl = new File(configuration.baseDirectory() + File.separatorChar
-//					+ configuration.webRoot()).toURI().toURL();
-//		} catch (MalformedURLException e) {
-//			logger.error(e.getMessage(), e);
-//			return;
-//		}
-//		final String warUrlString = warUrl.toExternalForm();
-//		ServletContextHandler context = new WebAppContext(warUrlString,
-//				configuration.contextPath());
-//		server.setHandler(context);
-//
-//		// add filter
-//		context.addFilter(new FilterHolder(new GettyFilter()), "/",
-//				FilterMapping.DEFAULT);
-//
-//		// add servlet
-//		RequestMapping mapping = new RequestMapping();
-//		mapping.configuration(configuration);
-//		GettyServlet servlet = new GettyServlet();
-//		servlet.requestMapping(mapping);
-//		context.addServlet(new ServletHolder(servlet), "*.groovy");
-//		context.setWelcomeFiles(configuration.indexPages());
-//
-//		try {
-//			new Thread(new Runnable() {
-//				public void run() {
-//					try {
-//						server.start();
-//						server.join();
-//					} catch (Exception e) {
-//						logger.error("Error when start Getty", e);
-//					}
-//				}
-//			}).start();
-//		} catch (Exception e) {
-//			logger.error("Error when start Getty", e);
-//		}
 	}
 	
 	private void setRuntimeParameters(org.eclipse.jetty.server.Server server, Configuration configuration) {
