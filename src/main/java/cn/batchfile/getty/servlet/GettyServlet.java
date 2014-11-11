@@ -28,6 +28,10 @@ public class GettyServlet implements Servlet {
 	private static final Logger logger = Logger.getLogger(GettyServlet.class);
 	private RequestMapping requestMapping;
 	private Map<String, Parser> parsers = new HashMap<String, Parser>();
+	
+	public GettyServlet(RequestMapping requestMapping) {
+		this.requestMapping = requestMapping;
+	}
 
 	public GettyServlet requestMapping(RequestMapping requestMapping) {
 		this.requestMapping = requestMapping;

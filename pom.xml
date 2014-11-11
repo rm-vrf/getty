@@ -23,6 +23,7 @@
 	<properties>
 		<java-version>1.6</java-version>
 		<org.slf4j-version>1.6.1</org.slf4j-version>
+		<jetty-version>9.1.5.v20140505</jetty-version>
 	</properties>
 	<dependencies>
 		<!-- Logging -->
@@ -61,7 +62,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
-			<version>7.6.3.v20120416</version>
+			<version>${jetty-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>

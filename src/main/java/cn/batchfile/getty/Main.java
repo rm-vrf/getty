@@ -15,7 +15,7 @@ import cn.batchfile.getty.configuration.Configuration;
 public class Main {
 	private static final Logger logger = Logger.getLogger(Main.class);
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		String n = IOUtils.LINE_SEPARATOR;
 		String log = n;
 		log += "  ____      _   _" + n;

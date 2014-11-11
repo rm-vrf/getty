@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 public class MimeTypes {
 	private static final Logger logger = Logger.getLogger(MimeTypes.class);
+	private static final String TEXT_PLAIN = "text/plain";
 	private boolean inited;
 	private Map<String, String> mimes = new HashMap<String, String>();
 
@@ -23,7 +24,7 @@ public class MimeTypes {
 		if (mimes.containsKey(ext)) {
 			return mimes.get(ext);
 		} else {
-			return org.eclipse.jetty.http.MimeTypes.TEXT_PLAIN;
+			return TEXT_PLAIN;
 		}
 	}
 	

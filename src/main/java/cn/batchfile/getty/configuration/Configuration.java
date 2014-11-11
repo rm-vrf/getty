@@ -158,6 +158,7 @@ public class Configuration {
 	 * Request Header Size
 	 * @return Request Header Size
 	 */
+	@Deprecated
 	public int requestHeaderSize() {
 		return requestHeaderSize;
 	}

@@ -25,6 +25,10 @@ public class RequestMapping {
 	private Map<String, File> classpathFiles = new ConcurrentHashMap<String, File>();
 	private Configuration configuration;
 	
+	public RequestMapping(Configuration configuration) {
+		this.configuration = configuration;
+	}
+	
 	public Configuration configuration() {
 		return configuration;
 	}
