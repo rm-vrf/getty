@@ -74,7 +74,7 @@ _model.put('person', person)
 _view.jsp '/samples/jsp/mvc.jsp'
 </pre>
 
-也支持JSON输入，这么干：
+也支持JSON输出，这么干：
 
 <pre>
 def map = ['ok': true]
