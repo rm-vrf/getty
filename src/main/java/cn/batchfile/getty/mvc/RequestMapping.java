@@ -20,7 +20,9 @@ import cn.batchfile.getty.configuration.Configuration;
 import cn.batchfile.getty.exceptions.ListDirectoryNotAllowedException;
 
 public class RequestMapping {
-	public static final String CLASSPATH_PREFIX = "/-cp";
+	public static final String CLASSPATH_PREFIX = "/_classpath";
+	public static final String CP_PREFIX = "/_cp";
+	
 	private static final Logger logger = Logger.getLogger(RequestMapping.class);
 	private Map<String, File> classpathFiles = new ConcurrentHashMap<String, File>();
 	private Configuration configuration;
@@ -50,6 +52,8 @@ public class RequestMapping {
 		
 		if (StringUtils.startsWith(uri, CLASSPATH_PREFIX)) {
 			return findClasspathResource(StringUtils.substring(uri, CLASSPATH_PREFIX.length()));
+		} else if (StringUtils.startsWith(uri, CP_PREFIX)) {
+			return findClasspathResource(StringUtils.substring(uri, CP_PREFIX.length()));
 		}
 		
 		String path = configuration.baseDirectory() + File.separatorChar + configuration.webRoot() + uri;

@@ -3,6 +3,10 @@ package cn.batchfile.getty.parser;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,13 +51,26 @@ public class DirectoryParser extends Parser {
 		response.getWriter().println(" <body>");
 		response.getWriter().println("<h1>Index of " + title + "</h1>");
 		response.getWriter().println("  <table>");
-		response.getWriter().println("   <tr><th valign=\"top\"><img src=\"/-cp/images/blank.png\" alt=\"[ICO]\"></th><th>Name</th><th>Last modified</th><th>Size</th><th>Description</th></tr>");
+		response.getWriter().println("   <tr><th valign=\"top\"><img src=\"/_cp/images/blank.png\" alt=\"[ICO]\"></th><th>Name</th><th>Last modified</th><th>Size</th><th>Description</th></tr>");
 		response.getWriter().println("   <tr><th colspan=\"5\"><hr></th></tr>");
-		response.getWriter().println("<tr><td valign=\"top\"><img src=\"/-cp/images/back.png\" alt=\"[PARENTDIR]\"></td><td><a href=\"" + parentDir + "\">Parent Directory</a></td><td>&nbsp;</td><td align=\"right\">  - </td><td>&nbsp;</td></tr>");
+		response.getWriter().println("<tr><td valign=\"top\"><img src=\"/_cp/images/back.png\" alt=\"[PARENTDIR]\"></td><td><a href=\"" + parentDir + "\">Parent Directory</a></td><td>&nbsp;</td><td align=\"right\">  - </td><td>&nbsp;</td></tr>");
+	}
+	
+	private String getComparatorName(File file) {
+		return String.format("%s:%s", file.isDirectory() ? "D" : "F", file.getName().toLowerCase());
 	}
 	
 	private void body(File dir, HttpServletRequest request, HttpServletResponse response) throws IOException {
-		File[] files = dir.listFiles();
+		List<File> files = Arrays.asList(dir.listFiles());
+		Collections.sort(files, new Comparator<File>() {
+			@Override
+			public int compare(File file1, File file2) {
+				String name1 = getComparatorName(file1);
+				String name2 = getComparatorName(file2);
+				return name1.compareTo(name2);
+			}
+		});
+		
 		for (File file : files) {
 			String name = file.getName();
 			String href = request.getRequestURI();
@@ -65,7 +82,7 @@ public class DirectoryParser extends Parser {
 			String type = file.isDirectory() ? "DIR" : "FILE";
 			String icon = file.isDirectory() ? "folder" : "generic";
 			String size = getSize(file);
-			response.getWriter().println("<tr><td valign=\"top\"><img src=\"/-cp/images/" + icon + ".png\" alt=\"[" + type + "]\"></td><td><a href=\"" + href + "\">" + name + "</a></td><td align=\"right\">" + time + "</td><td align=\"right\">  " + size + " </td><td>&nbsp;</td></tr>");
+			response.getWriter().println("<tr><td valign=\"top\"><img src=\"/_cp/images/" + icon + ".png\" alt=\"[" + type + "]\"></td><td><a href=\"" + href + "\">" + name + "</a></td><td align=\"right\">" + time + "</td><td align=\"right\">  " + size + " </td><td>&nbsp;</td></tr>");
 		}
 	}
 	

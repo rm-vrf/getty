@@ -21,7 +21,7 @@
 		<url>http://github.com/lane-cn/getty</url>
 	</scm>
 	<properties>
-		<java-version>1.6</java-version>
+		<java-version>1.7</java-version>
 		<org.slf4j-version>1.6.1</org.slf4j-version>
 		<jetty-version>9.1.5.v20140505</jetty-version>
 	</properties>

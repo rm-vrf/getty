@@ -18,7 +18,6 @@ Getty是一个运行Groovy脚本的Web服务器。
 - Jetty inside，运行Groovy代码
 - MVC + JSP View Resolvor
 - URL Rewriter
-- 内置ORM & 内嵌数据库
 - 支持Groovy编写ServletFilter
 - 也支持J2EE应用
 
