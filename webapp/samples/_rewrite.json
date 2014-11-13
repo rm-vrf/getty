@@ -1,0 +1,13 @@
+[
+	{
+		"pattern": "/param/{name}",
+		"method": "GET",
+		"header": "ContentType: application/x-www-form-urlencoded",
+		"uri": "/samples/param.groovy"
+	},
+	{
+		"pattern": "/sample/{sampleName}",
+		"method": ["GET", "HEAD"],
+		"uri": "/samples/{sampleName}.groovy"
+	}
+]

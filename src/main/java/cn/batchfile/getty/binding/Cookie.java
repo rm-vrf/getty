@@ -63,4 +63,11 @@ public class Cookie {
 	public Cookie remove(String name) {
 		return put(name, StringUtils.EMPTY, 0);
 	}
+	
+	public void removeAll() {
+		Map<String, String> map = get();
+		for (String key : map.keySet()) {
+			remove(key);
+		}
+	}
 }

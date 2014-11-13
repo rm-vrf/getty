@@ -15,13 +15,13 @@ public class Model {
 		this.request = request;
 	}
 
-	public Model put(String name, Object object) {
-		request.setAttribute(name, object);
+	public Model put(String name, Object value) {
+		request.setAttribute(name, value);
 		return this;
 	}
 	
-	public Model put(Map<String, Object> objects) {
-		for (Entry<String, Object> entry : objects.entrySet()) {
+	public Model put(Map<String, Object> values) {
+		for (Entry<String, Object> entry : values.entrySet()) {
 			request.setAttribute(entry.getKey(), entry.getValue());
 		}
 		return this;

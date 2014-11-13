@@ -37,4 +37,16 @@ public class Session {
 		}
 		return map;
 	}
+	
+	public void remove(String name) {
+		request.getSession(true).removeAttribute(name);
+	}
+
+	public void removeAll() {
+		Enumeration<String> names = request.getSession(true).getAttributeNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			request.getSession().removeAttribute(name);
+		}
+	}
 }

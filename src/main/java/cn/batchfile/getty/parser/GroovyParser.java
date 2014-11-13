@@ -17,6 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import cn.batchfile.getty.binding.Application;
 import cn.batchfile.getty.binding.Cookie;
 import cn.batchfile.getty.binding.Model;
 import cn.batchfile.getty.binding.Request;
@@ -48,6 +49,7 @@ public class GroovyParser extends Parser {
 		Logger _logger = Logger.getLogger(file.getName());
 		
 		Binding binding = new Binding();
+		binding.setProperty("_application", Application.getInstance());
 		binding.setProperty("_request", _request);
 		binding.setProperty("_response", _response);
 		binding.setProperty("_session", _session);
