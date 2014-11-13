@@ -18,7 +18,7 @@ public class Session {
 		return request.getRequestedSessionId();
 	}
 
-	public Session set(String name, Object value) {
+	public Session put(String name, Object value) {
 		request.getSession(true).setAttribute(name, value);
 		return this;
 	}

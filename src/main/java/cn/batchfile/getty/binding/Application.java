@@ -24,7 +24,7 @@ public class Application {
 		return map;
 	}
 	
-	public void put(String name, String value) {
+	public void put(String name, Object value) {
 		map.put(name, value);
 	}
 	
