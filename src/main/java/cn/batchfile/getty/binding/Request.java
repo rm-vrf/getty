@@ -14,11 +14,14 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 
 public class Request {
 	private static final Logger logger = Logger.getLogger(Request.class);
 	private HttpServletRequest servletRequest;
-	private String body;
+	private Object body;
 	private boolean bodyInited;
 	
 	public Request(HttpServletRequest servletRequest) {
@@ -141,7 +144,7 @@ public class Request {
 		return params;
 	}
 	
-	public String body() throws IOException {
+	public Object body() throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("content-type is: " + servletRequest.getContentType());
 		}
@@ -150,12 +153,24 @@ public class Request {
 			try {
 				stream = servletRequest.getInputStream();
 				List<String> lines = IOUtils.readLines(stream, charset());
-				body = StringUtils.join(lines, IOUtils.LINE_SEPARATOR);
+				String s = StringUtils.join(lines, IOUtils.LINE_SEPARATOR);
+				body = deserialize(s, servletRequest.getContentType());
 			} finally {
 				IOUtils.closeQuietly(stream);
 			}
 			bodyInited = true;
 		}
 		return body;
+	}
+
+	private Object deserialize(String s, String contentType) throws JsonParseException, JsonMappingException, IOException {
+		Object r = null;
+		if (StringUtils.equalsIgnoreCase("application/json", contentType)) {
+			ObjectMapper mapper = new ObjectMapper();
+			r = mapper.readValue(s, Object.class);
+		} else {
+			r = s;
+		}
+		return r;
 	}
 }
