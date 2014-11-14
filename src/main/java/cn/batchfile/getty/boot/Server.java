@@ -2,6 +2,7 @@ package cn.batchfile.getty.boot;
 
 import java.io.File;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -40,7 +41,7 @@ public class Server {
 		
 		// setup webapp
 		WebAppContext context = new WebAppContext();
-		context.setContextPath(configuration.contextPath());
+		context.setContextPath(StringUtils.isEmpty(configuration.contextPath()) ? "/" : configuration.contextPath());
 		String war = configuration.baseDirectory() + File.separatorChar + configuration.webRoot();
 		context.setWar(war);
 		context.setWelcomeFiles(configuration.indexPages());

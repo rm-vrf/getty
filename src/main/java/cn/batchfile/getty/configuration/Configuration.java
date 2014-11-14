@@ -168,6 +168,7 @@ public class Configuration {
 	 * @param requestHeaderSize Request Header Size
 	 * @return {@link Configuration}
 	 */
+	@Deprecated
 	public Configuration requestHeaderSize(int requestHeaderSize) {
 		this.requestHeaderSize = requestHeaderSize;
 		return this;
