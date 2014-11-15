@@ -56,8 +56,12 @@ public class Server {
 		GettyServlet servlet = new GettyServlet(mapping);
 		context.addServlet(new ServletHolder(servlet), "/");
 		
-		// kick off
+		// kick off http service
 		server.start();
+	}
+	
+	public void stop() {
+		
 	}
 	
 	private void setRuntimeParameters(org.eclipse.jetty.server.Server server, Configuration configuration) {

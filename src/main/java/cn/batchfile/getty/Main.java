@@ -32,8 +32,15 @@ public class Main {
 		log += "Groovy on Jetty!" + n;
 		logger.info(log);
 
-		Server server = new Server();
+		final Server server = new Server();
 		server.start(configuration);
+		
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				logger.info("run into stop hook");
+				server.stop();
+			}
+		});
 	}
 	
 	private Configuration getConfiguration(String[] args) {

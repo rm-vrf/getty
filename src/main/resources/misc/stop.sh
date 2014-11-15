@@ -1,3 +1,3 @@
 #!/bin/sh
 
-echo 'stop'
+kill -15 `ps -ef | grep java | grep getty | awk '{print $2}'`
