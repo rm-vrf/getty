@@ -31,9 +31,20 @@ public class Server {
 	 * @throws Exception 
 	 */
 	public void start(Configuration configuration) throws Exception {
+		
+		//start jetty
+		startJetty(configuration);
 		logger.info(String.format("<Getty startup at port %d>",
 				configuration.port()));
 		
+		//start startup hook
+	}
+	
+	public void stop() {
+		
+	}
+	
+	private void startJetty(Configuration configuration) throws Exception {
 		// create jetty server
 		final org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(
 				configuration.port());
@@ -58,10 +69,6 @@ public class Server {
 		
 		// kick off http service
 		server.start();
-	}
-	
-	public void stop() {
-		
 	}
 	
 	private void setRuntimeParameters(org.eclipse.jetty.server.Server server, Configuration configuration) {
