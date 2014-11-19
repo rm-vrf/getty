@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +29,7 @@ public class DirectoryParser extends Parser {
 	
 	@Override
 	public void parse(File dir, HttpServletRequest request,
-			HttpServletResponse response) throws IOException{
+			HttpServletResponse response, Map<String, Object> vars) throws IOException{
 		
 		response.setContentType("text/html");
 		response.setCharacterEncoding(configuration.charset());

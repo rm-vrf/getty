@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +38,7 @@ public class GroovyParser extends Parser {
 
 	@Override
 	public void parse(File file, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+			HttpServletResponse response, Map<String, Object> vars) throws IOException {
 		
 		//binding object
 		Request _request = new Request(request);
@@ -57,6 +58,11 @@ public class GroovyParser extends Parser {
 		binding.setProperty("_model", _model);
 		binding.setProperty("_view", _view);
 		binding.setProperty("_logger", _logger);
+		
+		//binging path vars
+		for (Entry<String, Object> entry : vars.entrySet()) {
+			binding.setVariable(entry.getKey(), entry.getValue());
+		}
 		
 		//binding input param
 		for (Entry<String, Object> entry : _request.parameters().entrySet()) {

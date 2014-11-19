@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,7 +26,7 @@ public class StaticParser extends Parser {
 	
 	@Override
 	public void parse(File file, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+			HttpServletResponse response, Map<String, Object> vars) throws IOException {
 		
 		response.setContentType(mimeTypes.getMimeByExtension(file.getName()));
 		response.setCharacterEncoding(configuration.charset());

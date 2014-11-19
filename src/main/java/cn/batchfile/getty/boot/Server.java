@@ -12,6 +12,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 import cn.batchfile.getty.configuration.Configuration;
 import cn.batchfile.getty.mvc.RequestMapping;
+import cn.batchfile.getty.mvc.Rewriter;
 import cn.batchfile.getty.servlet.GettyServlet;
 
 /**
@@ -37,7 +38,6 @@ public class Server {
 		logger.info(String.format("<Getty startup at port %d>",
 				configuration.port()));
 		
-		//start startup hook
 	}
 	
 	public void stop() {
@@ -50,10 +50,14 @@ public class Server {
 				configuration.port());
 		setRuntimeParameters(server, configuration);
 		
+		//load rewriter mapper
+		String war = configuration.baseDirectory() + File.separatorChar + configuration.webRoot();
+		Rewriter rewriter = new Rewriter();
+		rewriter.config(new File(war));
+		
 		// setup webapp
 		WebAppContext context = new WebAppContext();
 		context.setContextPath(StringUtils.isEmpty(configuration.contextPath()) ? "/" : configuration.contextPath());
-		String war = configuration.baseDirectory() + File.separatorChar + configuration.webRoot();
 		context.setWar(war);
 		context.setWelcomeFiles(configuration.indexPages());
 		context.setServer(server);
@@ -63,7 +67,7 @@ public class Server {
 		server.setHandler(context);
 		
 		// setup servlet mapping
-		RequestMapping mapping = new RequestMapping(configuration);
+		RequestMapping mapping = new RequestMapping(configuration, rewriter);
 		GettyServlet servlet = new GettyServlet(mapping);
 		context.addServlet(new ServletHolder(servlet), "/");
 		

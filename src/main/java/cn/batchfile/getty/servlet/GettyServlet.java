@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import cn.batchfile.getty.exceptions.ListDirectoryNotAllowedException;
+import cn.batchfile.getty.exceptions.RewriteMappingException;
 import cn.batchfile.getty.mvc.RequestMapping;
 import cn.batchfile.getty.parser.DirectoryParser;
 import cn.batchfile.getty.parser.GroovyParser;
@@ -72,27 +73,32 @@ public class GettyServlet implements Servlet {
 		HttpServletRequest h_request = (HttpServletRequest)request;
 		HttpServletResponse h_response = (HttpServletResponse)response; 
 		File file = null;
+		Map<String, Object> vars = new HashMap<String, Object>();
 		try {
-			file = requestMapping.mapping(h_request);
+			file = requestMapping.mapping(h_request, vars);
 		} catch (ListDirectoryNotAllowedException e) {
 			h_response.sendError(401, "Directory list not allowed");
-		}
-		
-		if (!file.exists()) {
-			h_response.sendError(404);
+			return;
+		} catch (RewriteMappingException e) {
+			h_response.sendError(410, e.getMessage());
 			return;
 		}
 		
-		dispatch(file, h_request, h_response);
+		if (file == null || !file.exists()) {
+			h_response.sendError(404);
+			return;
+		} else {
+			dispatch(file, h_request, h_response, vars);
+		}
 	}
 	
-	private void dispatch(File file, HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void dispatch(File file, HttpServletRequest request, HttpServletResponse response, Map<String, Object> vars) throws IOException {
 		if (file.isDirectory()) {
-			parsers.get("dir").parse(file, request, response);
+			parsers.get("dir").parse(file, request, response, vars);
 		} else if (StringUtils.endsWith(file.getName(), Parser.GROOVY_EXTENSION)) {
-			parsers.get("groovy").parse(file, request, response);
+			parsers.get("groovy").parse(file, request, response, vars);
 		} else {
-			parsers.get("static").parse(file, request, response);
+			parsers.get("static").parse(file, request, response, vars);
 		}
 	}
 }

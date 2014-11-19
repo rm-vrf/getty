@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import cn.batchfile.getty.configuration.Configuration;
 import cn.batchfile.getty.exceptions.ListDirectoryNotAllowedException;
+import cn.batchfile.getty.exceptions.RewriteMappingException;
 
 public class RequestMapping {
 	public static final String CLASSPATH_PREFIX = "/_classpath";
@@ -26,9 +27,11 @@ public class RequestMapping {
 	private static final Logger logger = Logger.getLogger(RequestMapping.class);
 	private Map<String, File> classpathFiles = new ConcurrentHashMap<String, File>();
 	private Configuration configuration;
+	private Rewriter rewriter;
 	
-	public RequestMapping(Configuration configuration) {
+	public RequestMapping(Configuration configuration, Rewriter rewriter) {
 		this.configuration = configuration;
+		this.rewriter = rewriter;
 	}
 	
 	public Configuration configuration() {
@@ -40,8 +43,11 @@ public class RequestMapping {
 		return this;
 	}
 
-	public File mapping(HttpServletRequest request) {
-		String uri = request.getRequestURI();
+	public File mapping(HttpServletRequest request, Map<String, Object> vars) throws RewriteMappingException {
+		String uri = rewriter.mapping(request, vars);
+		if (uri == null) {
+			uri = request.getRequestURI();
+		}
 		String context = configuration.contextPath();
 		uri = StringUtils.substring(uri, context.length());
 		try {
