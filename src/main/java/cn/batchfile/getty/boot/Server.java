@@ -3,6 +3,14 @@ package cn.batchfile.getty.boot;
 import java.io.File;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.vfs2.FileChangeEvent;
+import org.apache.commons.vfs2.FileListener;
+import org.apache.commons.vfs2.FileMonitor;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileType;
+import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.impl.DefaultFileMonitor;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -51,9 +59,23 @@ public class Server {
 		setRuntimeParameters(server, configuration);
 		
 		//load rewriter mapper
-		String war = configuration.baseDirectory() + File.separatorChar + configuration.webRoot();
-		Rewriter rewriter = new Rewriter();
+		final String war = configuration.baseDirectory() + File.separatorChar + configuration.webRoot();
+		final Rewriter rewriter = new Rewriter();
 		rewriter.config(new File(war));
+		
+		//add file watcher on webapp
+		ConfigFileListener listener = new ConfigFileListener();
+		DefaultFileMonitor fm = new DefaultFileMonitor(listener);
+		listener.setFileMonitor(fm);
+		listener.setRewriter(rewriter);
+		listener.setRoot(war);
+		fm.setDelay(2000);
+		fm.setRecursive(false);
+		FileObject file = VFS.getManager().resolveFile(war);
+		listener.addFile(fm, file);
+		
+		fm.start();
+		logger.info("add watcher on directory: " + war);
 		
 		// setup webapp
 		WebAppContext context = new WebAppContext();
@@ -89,6 +111,72 @@ public class Server {
 				qtp.setMinThreads(configuration.minThread());
 			}
 			qtp.setName("getty-http");
+		}
+	}
+	
+	class ConfigFileListener implements FileListener {
+		private FileMonitor fileMonitor;
+		private Rewriter rewriter;
+		private String root;
+		
+		public FileMonitor getFileMonitor() {
+			return fileMonitor;
+		}
+
+		public void setFileMonitor(FileMonitor fileMonitor) {
+			this.fileMonitor = fileMonitor;
+		}
+
+		public Rewriter getRewriter() {
+			return rewriter;
+		}
+
+		public void setRewriter(Rewriter rewriter) {
+			this.rewriter = rewriter;
+		}
+
+		public String getRoot() {
+			return root;
+		}
+
+		public void setRoot(String root) {
+			this.root = root;
+		}
+
+		@Override
+		public void fileChanged(FileChangeEvent event) throws Exception {
+			if (event.getFile().getType() == FileType.FOLDER) {
+				addFile(fileMonitor, event.getFile());
+			} else if (event.getFile().getName().getBaseName().equals(Rewriter.CONFIG_FILE)) {
+				rewriter.config(new File(root));
+			}
+		}
+
+		@Override
+		public void fileCreated(FileChangeEvent event) throws Exception {
+			if (event.getFile().getType() == FileType.FOLDER) {
+				addFile(fileMonitor, event.getFile());
+			} else if (event.getFile().getName().getBaseName().equals(Rewriter.CONFIG_FILE)) {
+				rewriter.config(new File(root));
+			}
+		}
+
+		@Override
+		public void fileDeleted(FileChangeEvent event) throws Exception {
+			if (event.getFile().getType() == FileType.FOLDER) {
+				fileMonitor.removeFile(event.getFile());
+			} else if (event.getFile().getName().getBaseName().equals(Rewriter.CONFIG_FILE)) {
+				rewriter.config(new File(root));
+			}
+		}
+
+		public void addFile(FileMonitor fm, FileObject file) throws FileSystemException {
+			if (file.getType() == FileType.FOLDER) {
+				fm.addFile(file);
+				for (FileObject child : file.getChildren()) {
+					addFile(fm, child);
+				}
+			} 
 		}
 	}
 }

@@ -22,8 +22,9 @@ import org.codehaus.jackson.type.TypeReference;
 import cn.batchfile.getty.exceptions.RewriteMappingException;
 
 public class Rewriter {
+	public static final String CONFIG_FILE = "_rewrite.json";
+	
 	private static final Logger LOG = Logger.getLogger(Rewriter.class);
-	private static final String CONFIG_FILE_JSON = "_rewrite.json";
 	private List<Pattern> patterns = new ArrayList<Pattern>();
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
@@ -37,7 +38,7 @@ public class Rewriter {
 		for (File file : files) {
 			if (file.isDirectory()) {
 				configDir(file);
-			} else if (file.getName().equals(CONFIG_FILE_JSON)) {
+			} else if (file.getName().equals(CONFIG_FILE)) {
 				LOG.info(String.format("Load rewrite config: %s", file.getPath()));
 				configFile(file);
 			}
@@ -150,6 +151,11 @@ public class Rewriter {
 	}
 	
 	private void configFile(File file) throws JsonParseException, JsonMappingException, IOException {
+		if (file.length() == 0) {
+			LOG.info("empty config file");
+			return;
+		}
+		
 		List<Map<String, Object>> list = objectMapper.readValue(file, new TypeReference<List<Map<String, Object>>>() {});
 		for (Map<String, Object> map : list) {
 			Pattern p = new Pattern();
