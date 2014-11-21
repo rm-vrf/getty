@@ -1,7 +1,7 @@
 def create() {
-	_logger.info('session create, id: ' + _session.id());
+	$logger.info('session create, id: ' + $session.id);
 }
 
 def destroy() {
-	_logger.info('session destroy, id: ' + _session.id());
+	$logger.info('session destroy, id: ' + $session.id);
 }
