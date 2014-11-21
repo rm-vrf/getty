@@ -1,11 +1,11 @@
-_request.headers().each{ header ->
-	_response.print(header.key)
-	_response.print(': ')
-	_response.print(header.value)
-	_response.println('<br/>')
+$request.headers.each{ header ->
+	$response.print(header.key)
+	$response.print(': ')
+	$response.print(header.value)
+	$response.println('<br/>')
 }
 
-_response.println('<br/>')
-_response.println('request accept: ' + _request.header('Accept') + '<p/>')
+$response.println('<br/>')
+$response.println('request accept: ' + $request.headers.Accept + '<p/>')
 
-_response.header('x-request-name', 'header')
+$response.headers['x-request-name'] = 'header'

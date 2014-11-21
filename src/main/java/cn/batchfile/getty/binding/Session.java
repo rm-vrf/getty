@@ -1,52 +1,40 @@
 package cn.batchfile.getty.binding;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 public class Session {
-	
-	private HttpServletRequest request; 
+
+	private HttpSession session;
+	private SessionAttributeMap attributes;
 
 	public Session(HttpServletRequest request) {
-		this.request = request;
+		session = request.getSession(true);
+		attributes = new SessionAttributeMap(session);
 	}
 	
-	public String id() {
-		return request.getRequestedSessionId();
-	}
-
-	public Session put(String name, Object value) {
-		request.getSession(true).setAttribute(name, value);
-		return this;
+	public long getCreationTime() {
+		return session.getCreationTime();
 	}
 	
-	public Object get(String name) {
-		return request.getSession(true).getAttribute(name);
+	public String getId() {
+		return session.getId();
 	}
 	
-	public Map<String, Object> get() {
-		Map<String, Object> map = new HashMap<String, Object>();
-		Enumeration<String> names = request.getSession(true).getAttributeNames();
-		while (names.hasMoreElements()) {
-			String name = names.nextElement();
-			Object value = request.getSession().getAttribute(name);
-			map.put(name, value);
-		}
-		return map;
+	public long getLastAccessedTime() {
+		return session.getLastAccessedTime();
 	}
 	
-	public void remove(String name) {
-		request.getSession(true).removeAttribute(name);
+	public int getMaxInactiveInterval() {
+		return session.getMaxInactiveInterval();
 	}
-
-	public void removeAll() {
-		Enumeration<String> names = request.getSession(true).getAttributeNames();
-		while (names.hasMoreElements()) {
-			String name = names.nextElement();
-			request.getSession().removeAttribute(name);
-		}
+	
+	public ServletContext getServletContext() {
+		return session.getServletContext();
+	}
+	
+	public SessionAttributeMap getAttributes() {
+		return attributes;
 	}
 }

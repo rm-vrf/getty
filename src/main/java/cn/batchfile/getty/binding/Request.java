@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,30 +19,34 @@ import org.codehaus.jackson.map.ObjectMapper;
 public class Request {
 	private static final Logger logger = Logger.getLogger(Request.class);
 	private HttpServletRequest servletRequest;
+	private RequestHeaderMap requestHeaderMap;
+	private RequestParameterMap requestParameterMap;
 	private Object body;
 	private boolean bodyInited;
 	
 	public Request(HttpServletRequest servletRequest) {
 		this.servletRequest = servletRequest;
+		requestHeaderMap = new RequestHeaderMap(this.servletRequest);
+		requestParameterMap = new RequestParameterMap(this.servletRequest);
 	}
 	
-	public String method() {
+	public String getMethod() {
 		return servletRequest.getMethod();
 	}
 	
-	public String queryString() {
+	public String getQueryString() {
 		return servletRequest.getQueryString();
 	}
 	
-	public int contentLength() {
+	public int getContentLength() {
 		return servletRequest.getContentLength();
 	}
 	
-	public String locale() {
+	public String getLocale() {
 		return servletRequest.getLocale().toString();
 	}
 	
-	public List<String> locales() {
+	public List<String> getLocales() {
 		List<String> list = new ArrayList<String>();
 		Enumeration<Locale> enums = servletRequest.getLocales();
 		while (enums.hasMoreElements()) {
@@ -53,98 +55,67 @@ public class Request {
 		return list;
 	}
 	
-	public String localAddress() {
+	public String getLocalAddress() {
 		return servletRequest.getLocalAddr();
 	}
 	
-	public String localName() {
+	public String getLocalName() {
 		return servletRequest.getLocalName();
 	}
 	
-	public int localPort() {
+	public int getLocalPort() {
 		return servletRequest.getLocalPort();
 	}
 	
-	public String protocol() {
+	public String getProtocol() {
 		return servletRequest.getProtocol();
 	}
 	
-	public String remoteUser() {
+	public String getRemoteUser() {
 		return servletRequest.getRemoteUser();
 	}
 	
-	public String remoteAddress() {
+	public String getRemoteAddress() {
 		return servletRequest.getRemoteAddr();
 	}
 	
-	public String remoteHost() {
+	public String getRemoteHost() {
 		return servletRequest.getRemoteHost();
 	}
 	
-	public String serverName() {
+	public String getServerName() {
 		return servletRequest.getServerName();
 	}
 	
-	public int serverPort() {
+	public int getServerPort() {
 		return servletRequest.getServerPort();
 	}
 	
-	public String schema() {
+	public String getSchema() {
 		return servletRequest.getScheme();
 	}
 	
-	public String uri() {
+	public String getUri() {
 		return servletRequest.getRequestURI();
 	}
 	
-	public String contentType() {
+	public String getContentType() {
 		return servletRequest.getContentType();
 	}
 	
-	public String charset() {
+	public String getCharset() {
 		return servletRequest.getCharacterEncoding();
 	}
 	
-	public String header(String name) {
-		return servletRequest.getHeader(name);
+	public RequestHeaderMap getHeaders() {
+		return requestHeaderMap;
 	}
 	
-	public Map<String, String> headers() {
-		Map<String, String> headers = new HashMap<String, String>();
-		Enumeration<String> names = servletRequest.getHeaderNames();
-		while (names.hasMoreElements()) {
-			String name = names.nextElement();
-			String value = servletRequest.getHeader(name);
-			headers.put(name, value);
-		}
-		return headers;
+	public RequestParameterMap getParameters() {
+		return requestParameterMap;
 	}
 	
-	public Object parameter(String name) {
-		String[] value = servletRequest.getParameterValues(name);
-		if (value != null && value.length == 1) {
-			return value[0];
-		} else {
-			return value;
-		}
-	}
-	
-	public Map<String, Object> parameters() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("content-type is: " + servletRequest.getContentType());
-		}
-		Map<String, Object> params = new HashMap<String, Object>();
-		
-		Enumeration<String> names = servletRequest.getParameterNames();
-		while (names.hasMoreElements()) {
-			String name = names.nextElement();
-			Object value = parameter(name);
-			params.put(name, value);
-		}
-		return params;
-	}
-	
-	public Object body() throws IOException {
+	public Object getBody() throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("content-type is: " + servletRequest.getContentType());
 		}
@@ -152,7 +123,7 @@ public class Request {
 			InputStream stream = null;
 			try {
 				stream = servletRequest.getInputStream();
-				List<String> lines = IOUtils.readLines(stream, charset());
+				List<String> lines = IOUtils.readLines(stream, getCharset());
 				String s = StringUtils.join(lines, IOUtils.LINE_SEPARATOR);
 				body = deserialize(s, servletRequest.getContentType());
 			} finally {

@@ -1,4 +1,4 @@
-_response.println 'name: ' + name + '<br/>'
-_response.println 'name again: ' + _request.parameter('name') + '<br/>'
-_response.println 'parameters: ' + _request.parameters() + '<br/>'
-_response.println 'body: ' + _request.body() + '<br/>'
+$response.println 'name: ' + name + '<br/>'
+$response.println 'name again: ' + $request.parameters.name + '<br/>'
+$response.println 'parameters: ' + $request.parameters + '<br/>'
+$response.println 'body: ' + $request.body + '<br/>'

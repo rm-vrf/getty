@@ -1,6 +1,7 @@
 package cn.batchfile.getty.boot;
 
 import java.io.File;
+import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileChangeEvent;
@@ -18,6 +19,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 
+import cn.batchfile.getty.binding.Application;
 import cn.batchfile.getty.configuration.Configuration;
 import cn.batchfile.getty.mvc.RequestMapping;
 import cn.batchfile.getty.mvc.Rewriter;
@@ -95,6 +97,9 @@ public class Server {
 		
 		// kick off http service
 		server.start();
+		
+		// set start time
+		Application.getInstance().setStartTime(new Date());
 	}
 	
 	private void setRuntimeParameters(org.eclipse.jetty.server.Server server, Configuration configuration) {

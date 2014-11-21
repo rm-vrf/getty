@@ -1,38 +1,44 @@
 package cn.batchfile.getty.binding;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Application {
 
-	private Map<String, Object> map = new ConcurrentHashMap<String, Object>();
 	private static Application instance = new Application();
+	private Date startTime;
+	private Map<String, Object> attributes;
 	
 	public static Application getInstance() {
 		return instance;
 	}
 	
 	private Application() {
-		
+		attributes = new ConcurrentHashMap<String, Object>();
 	}
 	
-	public Object get(String name) {
-		return map.get(name);
+	public String getName() {
+		return "getty";
 	}
 	
-	public Map<String, Object> get() {
-		return map;
+	public String getVersion() {
+		return "1.0.0-SNAPSHOT";
 	}
 	
-	public void put(String name, Object value) {
-		map.put(name, value);
+	public Date getBuildTime() {
+		return new Date(0);
 	}
 	
-	public void remove(String name) {
-		map.remove(name);
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
 	}
 	
-	public void removeAll() {
-		map.clear();
+	public Date getStartTime() {
+		return startTime;
+	}
+	
+	public Map<String, Object> getAttributes() {
+		return attributes;
 	}
 }

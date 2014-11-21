@@ -1,16 +1,21 @@
-def i = _application.get('counter')
+def i = $application.attributes.counter
 if (!(i > 0)) {
 	i = 0
 }
 i ++
-_application.put('counter', i)
-_response.println('application counter: ' + i)
-_response.println('<br/>')
+$application.attributes.counter = i
+$response.println('application start time: ' + $application.startTime)
+$response.println('<br/>')
+$response.println('application visit count: ' + i)
+$response.println('<p/>')
 
-def j = _session.get('counter')
+def j = $session.attributes.counter
 if (!(j > 0)) {
 	j = 0
 }
 j ++
-_session.put('counter', j)
-_response.println('session counter: ' + j)
+$session.attributes.counter = j
+$response.println('session id: ' + $session.id)
+$response.println('<br/>')
+$response.println('session visit count: ' + j)
+$response.println('<p/>')

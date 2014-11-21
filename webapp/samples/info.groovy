@@ -1,21 +1,21 @@
-def map = ['ok': true]
+def map = [:]
 
-map.charset = _request.charset()
-map.contentLength = _request.contentLength()
-map.contentType = _request.contentType()
-map.localAddress = _request.localAddress()
-map.locale = _request.locale()
-map.locales = _request.locales()
-map.localName = _request.localName()
-map.localPort = _request.localPort()
-map.method = _request.method()
-map.protocol = _request.protocol()
-map.queryString = _request.queryString()
-map.remoteAddress = _request.remoteAddress()
-map.remoteHost = _request.remoteHost()
-map.remoteUser = _request.remoteUser()
-map.schema = _request.schema()
-map.serverName = _request.serverName()
-map.serverPort = _request.serverPort()
+map.charset = $request.charset
+map.contentLength = $request.contentLength
+map.contentType = $request.contentType
+map.localAddress = $request.localAddress
+map.locale = $request.locale
+map.locales = $request.locales
+map.localName = $request.localName
+map.localPort = $request.localPort
+map.method = $request.method
+map.protocol = $request.protocol
+map.queryString = $request.queryString
+map.remoteAddress = $request.remoteAddress
+map.remoteHost = $request.remoteHost
+map.remoteUser = $request.remoteUser
+map.schema = $request.schema
+map.serverName = $request.serverName
+map.serverPort = $request.serverPort
 
-_view.json(map)
+$view.json(map)
