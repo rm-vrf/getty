@@ -1,7 +1,5 @@
 package cn.batchfile.getty.configuration;
 
-import org.apache.commons.lang.StringUtils;
-
 /**
  * 系统基本设置
  * @author htlu
@@ -13,9 +11,7 @@ public class Configuration {
 	private int minThread = -1;
 	private int maxIdleTime = -1;
 	private String logLevel = "INFO";
-	private String baseDirectory;
-	private String contextPath = StringUtils.EMPTY;
-	private int requestHeaderSize = -1;
+	private String contextPath = "/";
 	private int maxQueued = 1;
 	private String webRoot = "webapp";
 	private String fileEncoding = "UTF-8";
@@ -32,7 +28,7 @@ public class Configuration {
 	 * 端口
 	 * @return 端口
 	 */
-	public int port() {
+	public int getPort() {
 		return port;
 	}
 	
@@ -41,7 +37,7 @@ public class Configuration {
 	 * @param port 端口
 	 * @return {@link Configuration}
 	 */
-	public Configuration port(int port) {
+	public Configuration setPort(int port) {
 		this.port = port;
 		return this;
 	}
@@ -50,7 +46,7 @@ public class Configuration {
 	 * 最大线程数
 	 * @return 最大线程数
 	 */
-	public int maxThread() {
+	public int getMaxThread() {
 		return maxThread;
 	}
 	
@@ -59,7 +55,7 @@ public class Configuration {
 	 * @param maxThread 最大线程数
 	 * @return {@link Configuration}
 	 */
-	public Configuration maxThread(int maxThread) {
+	public Configuration setMaxThread(int maxThread) {
 		this.maxThread = maxThread;
 		return this;
 	}
@@ -68,7 +64,7 @@ public class Configuration {
 	 * 最小线程数
 	 * @return 最小线程数
 	 */
-	public int minThread() {
+	public int getMinThread() {
 		return minThread;
 	}
 	
@@ -77,7 +73,7 @@ public class Configuration {
 	 * @param minThread 最小线程数
 	 * @return {@link Configuration}
 	 */
-	public Configuration minThread(int minThread) {
+	public Configuration setMinThread(int minThread) {
 		this.minThread = minThread;
 		return this;
 	}
@@ -86,7 +82,7 @@ public class Configuration {
 	 * 线程空闲时间
 	 * @return 线程空闲时间
 	 */
-	public int maxIdleTime() {
+	public int getMaxIdleTime() {
 		return maxIdleTime;
 	}
 
@@ -95,7 +91,7 @@ public class Configuration {
 	 * @param maxIdleTime 线程空闲时间
 	 * @return {@link Configuration}
 	 */
-	public Configuration maxIdleTime(int maxIdleTime) {
+	public Configuration setMaxIdleTime(int maxIdleTime) {
 		this.maxIdleTime = maxIdleTime;
 		return this;
 	}
@@ -104,7 +100,7 @@ public class Configuration {
 	 * 日志级别
 	 * @return 日志级别
 	 */
-	public String logLevel() {
+	public String getLogLevel() {
 		return logLevel;
 	}
 
@@ -113,26 +109,8 @@ public class Configuration {
 	 * @param logLevel 日志级别
 	 * @return {@link Configuration}
 	 */
-	public Configuration logLevel(String logLevel) {
+	public Configuration setLogLevel(String logLevel) {
 		this.logLevel = logLevel;
-		return this;
-	}
-
-	/**
-	 * 根目录
-	 * @return 根目录
-	 */
-	public String baseDirectory() {
-		return baseDirectory;
-	}
-
-	/**
-	 * 根目录
-	 * @param baseDirectory 根目录
-	 * @return {@link Configuration}
-	 */
-	public Configuration baseDirectory(String baseDirectory) {
-		this.baseDirectory = baseDirectory;
 		return this;
 	}
 
@@ -140,7 +118,7 @@ public class Configuration {
 	 * Web Context
 	 * @return Web Context
 	 */
-	public String contextPath() {
+	public String getContextPath() {
 		return contextPath;
 	}
 
@@ -149,28 +127,8 @@ public class Configuration {
 	 * @param contextPath Web Context
 	 * @return {@link Configuration}
 	 */
-	public Configuration contextPath(String contextPath) {
+	public Configuration setContextPath(String contextPath) {
 		this.contextPath = contextPath;
-		return this;
-	}
-
-	/**
-	 * Request Header Size
-	 * @return Request Header Size
-	 */
-	@Deprecated
-	public int requestHeaderSize() {
-		return requestHeaderSize;
-	}
-
-	/**
-	 * Request Header Size
-	 * @param requestHeaderSize Request Header Size
-	 * @return {@link Configuration}
-	 */
-	@Deprecated
-	public Configuration requestHeaderSize(int requestHeaderSize) {
-		this.requestHeaderSize = requestHeaderSize;
 		return this;
 	}
 
@@ -178,7 +136,7 @@ public class Configuration {
 	 * Max Queued Messages
 	 * @return Max Queued Messages
 	 */
-	public int maxQueued() {
+	public int getMaxQueued() {
 		return maxQueued;
 	}
 
@@ -187,7 +145,7 @@ public class Configuration {
 	 * @param maxQueued Max Queued Messages
 	 * @return {@link Configuration}
 	 */
-	public Configuration maxQueued(int maxQueued) {
+	public Configuration setMaxQueued(int maxQueued) {
 		this.maxQueued = maxQueued;
 		return this;
 	}
@@ -196,7 +154,7 @@ public class Configuration {
 	 * Web Root
 	 * @return Web Root
 	 */
-	public String webRoot() {
+	public String getWebRoot() {
 		return webRoot;
 	}
 
@@ -205,7 +163,7 @@ public class Configuration {
 	 * @param webRoot Web Root
 	 * @return {@link Configuration}
 	 */
-	public Configuration webRoot(String webRoot) {
+	public Configuration setWebRoot(String webRoot) {
 		this.webRoot = webRoot;
 		return this;
 	}
@@ -214,7 +172,7 @@ public class Configuration {
 	 * File encoding
 	 * @return File encoding
 	 */
-	public String fileEncoding() {
+	public String getFileEncoding() {
 		return fileEncoding;
 	}
 
@@ -223,7 +181,7 @@ public class Configuration {
 	 * @param fileEncoding File encoding
 	 * @return {@link Configuration}
 	 */
-	public Configuration fileEncoding(String fileEncoding) {
+	public Configuration setFileEncoding(String fileEncoding) {
 		this.fileEncoding = fileEncoding;
 		return this;
 	}
@@ -232,7 +190,7 @@ public class Configuration {
 	 * Charset
 	 * @return Charset
 	 */
-	public String charset() {
+	public String getCharset() {
 		return charset;
 	}
 
@@ -241,7 +199,7 @@ public class Configuration {
 	 * @param charset Charset
 	 * @return {@link Configuration}
 	 */
-	public Configuration charset(String charset) {
+	public Configuration setCharset(String charset) {
 		this.charset = charset;
 		return this;
 	}
@@ -250,7 +208,7 @@ public class Configuration {
 	 * URI Encoding
 	 * @return URI Encoding
 	 */
-	public String uriEncoding() {
+	public String getUriEncoding() {
 		return uriEncoding;
 	}
 
@@ -259,7 +217,7 @@ public class Configuration {
 	 * @param uriEncoding URI Encoding
 	 * @return {@link Configuration}
 	 */
-	public Configuration uriEncoding(String uriEncoding) {
+	public Configuration setUriEncoding(String uriEncoding) {
 		this.uriEncoding = uriEncoding;
 		return this;
 	}
@@ -269,7 +227,7 @@ public class Configuration {
 	 * @return Allow List Directory
 	 * @return {@link Configuration}
 	 */
-	public boolean allowListDirectory() {
+	public boolean getAllowListDirectory() {
 		return allowListDirectory;
 	}
 
@@ -277,7 +235,7 @@ public class Configuration {
 	 * Allow List Directory
 	 * @param allowListDirectory Allow List Directory
 	 */
-	public Configuration allowListDirectory(boolean allowListDirectory) {
+	public Configuration setAllowListDirectory(boolean allowListDirectory) {
 		this.allowListDirectory = allowListDirectory;
 		return this;
 	}
@@ -287,7 +245,7 @@ public class Configuration {
 	 * @return Index Pages
 	 * @return {@link Configuration}
 	 */
-	public String[] indexPages() {
+	public String[] getIndexPages() {
 		return indexPages;
 	}
 
@@ -296,7 +254,7 @@ public class Configuration {
 	 * @param indexPages Index Pages
 	 * @return {@link Configuration}
 	 */
-	public Configuration indexPages(String[] indexPages) {
+	public Configuration setIndexPages(String[] indexPages) {
 		this.indexPages = indexPages;
 		return this;
 	}

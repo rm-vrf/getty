@@ -4,11 +4,15 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import cn.batchfile.getty.configuration.Configuration;
+
 public class Application {
 
 	private static Application instance = new Application();
 	private Date startTime;
 	private Map<String, Object> attributes;
+	private Configuration configuration;
+	private String baseDirectory;
 	
 	public static Application getInstance() {
 		return instance;
@@ -38,7 +42,23 @@ public class Application {
 		return startTime;
 	}
 	
+	public String getBaseDirectory() {
+		return baseDirectory;
+	}
+
+	public void setBaseDirectory(String baseDirectory) {
+		this.baseDirectory = baseDirectory;
+	}
+
 	public Map<String, Object> getAttributes() {
 		return attributes;
+	}
+
+	public Configuration getConfiguration() {
+		return configuration;
+	}
+
+	public void setConfiguration(Configuration configuration) {
+		this.configuration = configuration;
 	}
 }

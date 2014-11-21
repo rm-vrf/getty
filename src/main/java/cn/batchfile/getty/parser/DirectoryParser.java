@@ -32,7 +32,7 @@ public class DirectoryParser extends Parser {
 			HttpServletResponse response, Map<String, Object> vars) throws IOException{
 		
 		response.setContentType("text/html");
-		response.setCharacterEncoding(configuration.charset());
+		response.setCharacterEncoding(configuration.getCharset());
 		
 		head(dir, request, response);
 		tableHead(dir, request, response);

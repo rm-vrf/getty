@@ -21,8 +21,8 @@ import cn.batchfile.getty.exceptions.ListDirectoryNotAllowedException;
 import cn.batchfile.getty.exceptions.RewriteMappingException;
 
 public class RequestMapping {
-	public static final String CLASSPATH_PREFIX = "/_classpath";
-	public static final String CP_PREFIX = "/_cp";
+	public static final String CLASSPATH_PREFIX = "_classpath";
+	public static final String CP_PREFIX = "_cp";
 	
 	private static final Logger logger = Logger.getLogger(RequestMapping.class);
 	private Map<String, File> classpathFiles = new ConcurrentHashMap<String, File>();
@@ -48,10 +48,10 @@ public class RequestMapping {
 		if (uri == null) {
 			uri = request.getRequestURI();
 		}
-		String context = configuration.contextPath();
+		String context = configuration.getContextPath();
 		uri = StringUtils.substring(uri, context.length());
 		try {
-			uri = URLDecoder.decode(uri, configuration.uriEncoding());
+			uri = URLDecoder.decode(uri, configuration.getUriEncoding());
 		} catch (UnsupportedEncodingException e) {
 			//pass
 		}
@@ -62,7 +62,7 @@ public class RequestMapping {
 			return findClasspathResource(StringUtils.substring(uri, CP_PREFIX.length()));
 		}
 		
-		String path = configuration.baseDirectory() + File.separatorChar + configuration.webRoot() + uri;
+		String path = configuration.getWebRoot() + File.separatorChar + uri;
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("mapping uri: %s to: %s", uri, path));
 		}
@@ -71,18 +71,18 @@ public class RequestMapping {
 		
 		//如果是目录，寻找目录中的默认文档
 		if (file.isDirectory()) {
-			if (!configuration.allowListDirectory()) {
+			if (!configuration.getAllowListDirectory()) {
 				throw new ListDirectoryNotAllowedException();
 			}
 			
-			for (String indexPage : configuration.indexPages()) {
+			for (String indexPage : configuration.getIndexPages()) {
 				String page = file.getAbsolutePath() + File.separatorChar + indexPage;
 				File f = new File(page);
 				if (f.exists()) {
 					return f;
 				}
 			}
-			if (configuration.allowListDirectory()) {
+			if (configuration.getAllowListDirectory()) {
 				return file;
 			} else {
 				throw new ListDirectoryNotAllowedException();

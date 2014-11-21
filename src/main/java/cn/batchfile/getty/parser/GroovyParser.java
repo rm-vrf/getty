@@ -71,16 +71,16 @@ public class GroovyParser extends Parser {
 		}
 		
 		//set response charset
-		response.setCharacterEncoding(configuration.charset());
+		response.setCharacterEncoding(configuration.getCharset());
 
 		//execute script file
 		GroovyShell shell = new GroovyShell(binding);
 		InputStream stream = null;
 		try {
 			stream = new FileInputStream(file);
-			List<String> lines = IOUtils.readLines(stream, configuration.fileEncoding());
+			List<String> lines = IOUtils.readLines(stream, configuration.getFileEncoding());
 			String scriptText = StringUtils.join(lines, IOUtils.LINE_SEPARATOR);
-			String base = configuration.baseDirectory() + File.separatorChar + configuration.webRoot();
+			String base = configuration.getWebRoot();
 			Object r = shell.evaluate(scriptText, file.getName(), base);
 			if (logger.isDebugEnabled()) {
 				logger.debug("shell return value: " + r);

@@ -3,7 +3,6 @@ package cn.batchfile.getty.boot;
 import java.io.File;
 import java.util.Date;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileChangeEvent;
 import org.apache.commons.vfs2.FileListener;
 import org.apache.commons.vfs2.FileMonitor;
@@ -46,7 +45,7 @@ public class Server {
 		//start jetty
 		startJetty(configuration);
 		logger.info(String.format("<Getty startup at port %d>",
-				configuration.port()));
+				configuration.getPort()));
 		
 	}
 	
@@ -57,33 +56,33 @@ public class Server {
 	private void startJetty(Configuration configuration) throws Exception {
 		// create jetty server
 		final org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(
-				configuration.port());
+				configuration.getPort());
 		setRuntimeParameters(server, configuration);
 		
 		//load rewriter mapper
-		final String war = configuration.baseDirectory() + File.separatorChar + configuration.webRoot();
+		final String webDirectory = configuration.getWebRoot();
 		final Rewriter rewriter = new Rewriter();
-		rewriter.config(new File(war));
+		rewriter.config(new File(webDirectory));
 		
 		//add file watcher on webapp
 		ConfigFileListener listener = new ConfigFileListener();
 		DefaultFileMonitor fm = new DefaultFileMonitor(listener);
 		listener.setFileMonitor(fm);
 		listener.setRewriter(rewriter);
-		listener.setRoot(war);
+		listener.setRoot(webDirectory);
 		fm.setDelay(2000);
 		fm.setRecursive(false);
-		FileObject file = VFS.getManager().resolveFile(war);
+		FileObject file = VFS.getManager().resolveFile(webDirectory);
 		listener.addFile(fm, file);
 		
 		fm.start();
-		logger.info("add watcher on directory: " + war);
+		logger.info("add watcher on directory: " + webDirectory);
 		
 		// setup webapp
 		WebAppContext context = new WebAppContext();
-		context.setContextPath(StringUtils.isEmpty(configuration.contextPath()) ? "/" : configuration.contextPath());
-		context.setWar(war);
-		context.setWelcomeFiles(configuration.indexPages());
+		context.setContextPath(configuration.getContextPath());
+		context.setWar(webDirectory);
+		context.setWelcomeFiles(configuration.getIndexPages());
 		context.setServer(server);
 		
 		HashLoginService loginService = new HashLoginService("TEST-SECURITY-REALM");
@@ -98,22 +97,23 @@ public class Server {
 		// kick off http service
 		server.start();
 		
-		// set start time
+		// set start time & config
 		Application.getInstance().setStartTime(new Date());
+		Application.getInstance().setConfiguration(configuration);
 	}
 	
 	private void setRuntimeParameters(org.eclipse.jetty.server.Server server, Configuration configuration) {
 		ThreadPool pool = server.getThreadPool();
 		if (pool instanceof QueuedThreadPool) {
 			QueuedThreadPool qtp = (QueuedThreadPool)pool;
-			if (configuration.maxIdleTime() > 0) {
-				qtp.setIdleTimeout(configuration.maxIdleTime());
+			if (configuration.getMaxIdleTime() > 0) {
+				qtp.setIdleTimeout(configuration.getMaxIdleTime());
 			}
-			if (configuration.maxThread() > 0) {
-				qtp.setMaxThreads(configuration.maxThread());
+			if (configuration.getMaxThread() > 0) {
+				qtp.setMaxThreads(configuration.getMaxThread());
 			}
-			if (configuration.minThread() > 0) {
-				qtp.setMinThreads(configuration.minThread());
+			if (configuration.getMinThread() > 0) {
+				qtp.setMinThreads(configuration.getMinThread());
 			}
 			qtp.setName("getty-http");
 		}

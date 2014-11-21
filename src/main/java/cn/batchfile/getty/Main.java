@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import cn.batchfile.getty.binding.Application;
 import cn.batchfile.getty.boot.Server;
 import cn.batchfile.getty.configuration.Configuration;
 import cn.batchfile.getty.util.Log4jConfigurator;
@@ -17,9 +18,17 @@ public class Main {
 	private static final Logger logger = Logger.getLogger(Main.class);
 
 	public static void main(String[] args) throws Exception {
-		Configuration configuration = new Main().getConfiguration(args);
+		//set base directory
+		File file = new File(".");
+		String path = file.getAbsolutePath();
+		if (StringUtils.endsWith(path, File.separator + ".")) {
+			path = StringUtils.substring(path, 0, path.length() - (File.separator + ".").length());
+		}
+		Application.getInstance().setBaseDirectory(path);
 		
-		new Log4jConfigurator().load(configuration);
+		Configuration configuration = new Main().getConfiguration(path, args);
+		
+		new Log4jConfigurator().load(path, configuration);
 		
 		String n = IOUtils.LINE_SEPARATOR;
 		String log = n;
@@ -43,47 +52,66 @@ public class Main {
 		});
 	}
 	
-	private Configuration getConfiguration(String[] args) {
+	private Configuration getConfiguration(String baseDirectory, String[] args) {
 		Configuration configuration = new Configuration();
-		
-		//set base directory
-		File file = new File(".");
-		String path = file.getAbsolutePath();
-		if (StringUtils.endsWith(path, File.separator + ".")) {
-			path = StringUtils.substring(path, 0, path.length() - (File.separator + ".").length());
-		}
-		configuration.baseDirectory(path);
 		
 		//set args
 		for (String arg : args) {
 			if (getValue(arg, "port") != null) {
-				configuration.port(Integer.valueOf(getValue(arg, "port")));
+				configuration.setPort(Integer.valueOf(getValue(arg, "port")));
 			} else if (getValue(arg, "max.thread") != null) {
-				configuration.maxThread(Integer.valueOf(getValue(arg, "max.thread")));
+				configuration.setMaxThread(Integer.valueOf(getValue(arg, "max.thread")));
 			} else if (getValue(arg, "min.thread") != null) {
-				configuration.minThread(Integer.valueOf(getValue(arg, "min.thread")));
+				configuration.setMinThread(Integer.valueOf(getValue(arg, "min.thread")));
 			} else if (getValue(arg, "max.idle") != null) {
-				configuration.maxIdleTime(Integer.valueOf(getValue(arg, "max.idle")));
+				configuration.setMaxIdleTime(Integer.valueOf(getValue(arg, "max.idle")));
 			} else if (getValue(arg, "log.level") != null) {
-				configuration.logLevel(getValue(arg, "log.level"));
+				configuration.setLogLevel(getValue(arg, "log.level"));
 			} else if (getValue(arg, "max.queued") != null) {
-				configuration.maxQueued(Integer.valueOf(getValue(arg, "max.queued")));
+				configuration.setMaxQueued(Integer.valueOf(getValue(arg, "max.queued")));
 			} else if (getValue(arg, "web.root") != null) {
-				configuration.webRoot(getValue(arg, "web.root"));
+				configuration.setWebRoot(getValue(arg, "web.root"));
 			} else if (getValue(arg, "file.encoding") != null) {
-				configuration.fileEncoding(getValue(arg, "file.encoding"));
+				configuration.setFileEncoding(getValue(arg, "file.encoding"));
 			} else if (getValue(arg, "uri.encoding") != null) {
-				configuration.uriEncoding(getValue(arg, "uri.encoding"));
+				configuration.setUriEncoding(getValue(arg, "uri.encoding"));
 			} else if (getValue(arg, "charset") != null) {
-				configuration.charset(getValue(arg, "charset"));
+				configuration.setCharset(getValue(arg, "charset"));
 			} else if (getValue(arg, "list.directory") != null) {
-				configuration.allowListDirectory(Boolean.valueOf(getValue(arg, "list.directory")));
+				configuration.setAllowListDirectory(Boolean.valueOf(getValue(arg, "list.directory")));
 			} else if (getValue(arg, "index.pages") != null) {
-				configuration.indexPages(StringUtils.split(getValue(arg, "index.pages"), ","));
+				configuration.setIndexPages(StringUtils.split(getValue(arg, "index.pages"), ","));
 			}
 		}
 		
+		// 用绝对路径替换web root
+		String webRoot = getAbsoluttePath(baseDirectory, configuration.getWebRoot());
+		configuration.setWebRoot(webRoot);
+		
 		return configuration;
+	}
+	
+	private String getAbsoluttePath(String base, String dir) {
+		if (!isAbsolutePath(dir)) {
+			dir = base + IOUtils.DIR_SEPARATOR + dir;
+		}
+		File file = new File(dir);
+		return file.getAbsolutePath();
+	}
+	
+	private boolean isAbsolutePath(String path) {
+		if (StringUtils.startsWith(path, "/") || StringUtils.startsWith(path, "\\")) {
+			return true;
+		}
+		
+		if (IOUtils.DIR_SEPARATOR == '\\') {
+			logger.debug("running on windows system");
+			if (path.charAt(1) == ':') {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	private String getValue(String arg, String prefix) {

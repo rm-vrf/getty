@@ -29,7 +29,7 @@ public class StaticParser extends Parser {
 			HttpServletResponse response, Map<String, Object> vars) throws IOException {
 		
 		response.setContentType(mimeTypes.getMimeByExtension(file.getName()));
-		response.setCharacterEncoding(configuration.charset());
+		response.setCharacterEncoding(configuration.getCharset());
 		
 		InputStream stream = null;
 		try {

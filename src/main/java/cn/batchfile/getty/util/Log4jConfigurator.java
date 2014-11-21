@@ -15,7 +15,7 @@ import cn.batchfile.getty.configuration.Configuration;
 
 public class Log4jConfigurator {
 
-	public void load(Configuration configuration) throws UnsupportedEncodingException, IOException {
+	public void load(String baseDirectory, Configuration configuration) throws UnsupportedEncodingException, IOException {
 		String config = getLog4jConfig();
 		String[] search = new String[] {
 				"{LOG_LEVEL}", 
@@ -23,9 +23,9 @@ public class Log4jConfigurator {
 				"{APP_LOG}"
 				};
 		String[] replacement = new String[] {
-				configuration.logLevel(), 
-				configuration.baseDirectory() + File.separatorChar + "log" + File.separatorChar + "server.log", 
-				configuration.baseDirectory() + File.separatorChar + "log" + File.separatorChar + "app.log"
+				configuration.getLogLevel(), 
+				baseDirectory + File.separatorChar + "log" + File.separatorChar + "server.log", 
+				baseDirectory + File.separatorChar + "log" + File.separatorChar + "app.log"
 				};
 		config = StringUtils.replaceEach(config, search, replacement);
 		
