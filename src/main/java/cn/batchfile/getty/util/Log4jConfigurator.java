@@ -19,12 +19,10 @@ public class Log4jConfigurator {
 		String config = getLog4jConfig();
 		String[] search = new String[] {
 				"{LOG_LEVEL}", 
-				"{SERVER_LOG}", 
 				"{APP_LOG}"
 				};
 		String[] replacement = new String[] {
 				configuration.getLogLevel(), 
-				baseDirectory + File.separatorChar + "log" + File.separatorChar + "server.log", 
 				baseDirectory + File.separatorChar + "log" + File.separatorChar + "app.log"
 				};
 		config = StringUtils.replaceEach(config, search, replacement);

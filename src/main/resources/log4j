@@ -1,26 +1,19 @@
-log4j.rootCategory={LOG_LEVEL},console,app
+log4j.rootCategory={LOG_LEVEL},console,file
 
 ##########################
 # This is to hide the VERY VERY verbose log messages that restlet is generating
 ##########################
-log4j.logger.org.eclipse.jetty=INFO,server
-log4j.logger.cn.batchfile.getty={LOG_LEVEL},server
+log4j.logger.org.eclipse.jetty=INFO
+log4j.logger.cn.batchfile.getty={LOG_LEVEL}
 
 # CONSOLE
 log4j.appender.console=org.apache.log4j.ConsoleAppender
 log4j.appender.console.layout=org.apache.log4j.PatternLayout
 log4j.appender.console.layout.ConversionPattern=%p [(%c{3})] %m%n
 
-# SERVER LOGFILE
-log4j.appender.server=org.apache.log4j.DailyRollingFileAppender
-log4j.appender.server.File={SERVER_LOG}
-log4j.appender.server.Append=true
-log4j.appender.server.layout=org.apache.log4j.PatternLayout
-log4j.appender.server.layout.ConversionPattern=%d{ISO8601} [%t][%c] %m%n
-
-# APP LOGFILE
-log4j.appender.app=org.apache.log4j.DailyRollingFileAppender
-log4j.appender.app.File={APP_LOG}
-log4j.appender.app.Append=true
-log4j.appender.app.layout=org.apache.log4j.PatternLayout
-log4j.appender.app.layout.ConversionPattern=%d{ISO8601} [%t][%c] %m%n
+# LOGFILE
+log4j.appender.file=org.apache.log4j.DailyRollingFileAppender
+log4j.appender.file.File={APP_LOG}
+log4j.appender.file.Append=true
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{ISO8601} [%t][%c] %m%n
