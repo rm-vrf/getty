@@ -1,6 +1,7 @@
 package cn.batchfile.getty.boot;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 
 import org.apache.commons.vfs2.FileChangeEvent;
@@ -22,6 +23,7 @@ import cn.batchfile.getty.binding.Application;
 import cn.batchfile.getty.configuration.Configuration;
 import cn.batchfile.getty.mvc.RequestMapping;
 import cn.batchfile.getty.mvc.Rewriter;
+import cn.batchfile.getty.servlet.ApplicationListener;
 import cn.batchfile.getty.servlet.GettyServlet;
 
 /**
@@ -32,6 +34,7 @@ import cn.batchfile.getty.servlet.GettyServlet;
  */
 public class Server {
 	private static final Logger logger = Logger.getLogger(Server.class);
+	private ApplicationListener applicationListener;
 
 	/**
 	 * 启动服务
@@ -49,8 +52,8 @@ public class Server {
 		
 	}
 	
-	public void stop() {
-		
+	public void stop() throws IOException {
+		applicationListener.stop();
 	}
 	
 	private void startJetty(Configuration configuration) throws Exception {
@@ -64,11 +67,17 @@ public class Server {
 		final Rewriter rewriter = new Rewriter();
 		rewriter.config(new File(webDirectory));
 		
+		//load application listener
+		final ApplicationListener appListener = new ApplicationListener(configuration, Application.getInstance());
+		appListener.config(new File(webDirectory));
+		applicationListener = appListener;
+		
 		//add file watcher on webapp
 		ConfigFileListener listener = new ConfigFileListener();
 		DefaultFileMonitor fm = new DefaultFileMonitor(listener);
 		listener.setFileMonitor(fm);
 		listener.setRewriter(rewriter);
+		listener.setApplicationListener(appListener);
 		listener.setRoot(webDirectory);
 		fm.setDelay(2000);
 		fm.setRecursive(false);
@@ -100,6 +109,9 @@ public class Server {
 		// set start time & config
 		Application.getInstance().setStartTime(new Date());
 		Application.getInstance().setConfiguration(configuration);
+		
+		//invoke application start event
+		applicationListener.start();
 	}
 	
 	private void setRuntimeParameters(org.eclipse.jetty.server.Server server, Configuration configuration) {
@@ -122,6 +134,7 @@ public class Server {
 	class ConfigFileListener implements FileListener {
 		private FileMonitor fileMonitor;
 		private Rewriter rewriter;
+		private ApplicationListener applicationListener;
 		private String root;
 		
 		public FileMonitor getFileMonitor() {
@@ -140,6 +153,14 @@ public class Server {
 			this.rewriter = rewriter;
 		}
 
+		public ApplicationListener getApplicationListener() {
+			return applicationListener;
+		}
+
+		public void setApplicationListener(ApplicationListener applicationListener) {
+			this.applicationListener = applicationListener;
+		}
+
 		public String getRoot() {
 			return root;
 		}
@@ -154,6 +175,8 @@ public class Server {
 				addFile(fileMonitor, event.getFile());
 			} else if (event.getFile().getName().getBaseName().equals(Rewriter.CONFIG_FILE)) {
 				rewriter.config(new File(root));
+			} else if (event.getFile().getName().getBaseName().equals(ApplicationListener.CONFIG_FILE)) {
+				applicationListener.config(new File(root));
 			}
 		}
 
@@ -163,6 +186,8 @@ public class Server {
 				addFile(fileMonitor, event.getFile());
 			} else if (event.getFile().getName().getBaseName().equals(Rewriter.CONFIG_FILE)) {
 				rewriter.config(new File(root));
+			} else if (event.getFile().getName().getBaseName().equals(ApplicationListener.CONFIG_FILE)) {
+				applicationListener.config(new File(root));
 			}
 		}
 
@@ -172,6 +197,8 @@ public class Server {
 				fileMonitor.removeFile(event.getFile());
 			} else if (event.getFile().getName().getBaseName().equals(Rewriter.CONFIG_FILE)) {
 				rewriter.config(new File(root));
+			} else if (event.getFile().getName().getBaseName().equals(ApplicationListener.CONFIG_FILE)) {
+				applicationListener.config(new File(root));
 			}
 		}
 

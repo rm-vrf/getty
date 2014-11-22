@@ -1,6 +1,7 @@
 package cn.batchfile.getty;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -46,8 +47,12 @@ public class Main {
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
-				logger.info("run into stop hook");
-				server.stop();
+				logger.info("stop hook");
+				try {
+					server.stop();
+				} catch (IOException e) {
+					logger.error(e);
+				}
 			}
 		});
 	}
