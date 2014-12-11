@@ -46,20 +46,21 @@ chmod a+x start.sh
 
 Getty向Groovy脚本注入了几个变量，大家一看名字就知道这是什么意思：
 
-- _request
-- _response
-- _session
-- _cookie
-- _model
-- _view
-- _logger
+- $request
+- $response
+- $application
+- $session
+- $cookie
+- $model
+- $view
+- $logger
 
 例如，要从请求中获取所有的变量，输出到页面上，这样写：
 <pre>
-_request.parameters().each { param ->
-    _response.print(param.key)
-	_response.print(': ')
-	_response.prinln(param.value)
+$request.parameters.each { param ->
+    $response.print param.key
+	$response.print ': '
+	$response.prinln param.value
 }
 </pre>
 
@@ -69,15 +70,15 @@ _request.parameters().each { param ->
 
 <pre>
 person = ['name': 'John', 'age': 18]
-_model.put('person', person)
-_view.jsp '/samples/jsp/mvc.jsp'
+$model.put('person', person)
+$view.jsp '/samples/jsp/mvc.jsp'
 </pre>
 
 也支持JSON输出，这么干：
 
 <pre>
 def map = ['ok': true]
-_view.json(map)
+$view.json(map)
 </pre>
 
 下一步的计划
@@ -87,5 +88,22 @@ _view.json(map)
 - 支持文件上传
 - 支持URL Rewrite，实现RESTful服务
 - 支持应用启动脚本
-- 支持Session Create和Session Destr绑定脚本
+- 支持Session Create和Session Destroy绑定脚本
 
+12月10日
+----------
+
+好久没回来了，代码没闲着。最近做完了这几件事情：
+
+- 实现了URL Rewrite，看samples目录里面的_rewrite.json
+- 实现了应用启动脚本，看sample目录里的_application.json
+- 实现了Sessio Create和Session Destroy绑定脚本
+
+文件上传还没实现，再等等。
+
+下面有几个想法：
+
+- 可以实现脚本远程加载，这样在集群中部署Getty代码就简单了，只需要在一处部署
+- 过滤器（Filter）还没有实现，很多应用也是需要的
+- 文件上传，还是要搞的
+- 调试和开发方面，需要在Eclipse里面做调试插件和代码提示插件
