@@ -11,7 +11,6 @@ public class Configuration {
 	private int minThread = -1;
 	private int maxIdleTime = -1;
 	private String logLevel = "INFO";
-	private String contextPath = "/";
 	private int maxQueued = 1;
 	private String webRoot = "webapp";
 	private String fileEncoding = "UTF-8";
@@ -111,24 +110,6 @@ public class Configuration {
 	 */
 	public Configuration setLogLevel(String logLevel) {
 		this.logLevel = logLevel;
-		return this;
-	}
-
-	/**
-	 * Web Context
-	 * @return Web Context
-	 */
-	public String getContextPath() {
-		return contextPath;
-	}
-
-	/**
-	 * Web Context
-	 * @param contextPath Web Context
-	 * @return {@link Configuration}
-	 */
-	public Configuration setContextPath(String contextPath) {
-		this.contextPath = contextPath;
 		return this;
 	}
 

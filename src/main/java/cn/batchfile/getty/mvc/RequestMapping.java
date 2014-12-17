@@ -21,8 +21,8 @@ import cn.batchfile.getty.exceptions.ListDirectoryNotAllowedException;
 import cn.batchfile.getty.exceptions.RewriteMappingException;
 
 public class RequestMapping {
-	public static final String CLASSPATH_PREFIX = "_classpath";
-	public static final String CP_PREFIX = "_cp";
+	public static final String CLASSPATH_PREFIX = "/_classpath";
+	public static final String CP_PREFIX = "/_cp";
 	
 	private static final Logger logger = Logger.getLogger(RequestMapping.class);
 	private Map<String, File> classpathFiles = new ConcurrentHashMap<String, File>();
@@ -48,8 +48,7 @@ public class RequestMapping {
 		if (uri == null) {
 			uri = request.getRequestURI();
 		}
-		String context = configuration.getContextPath();
-		uri = StringUtils.substring(uri, context.length());
+		
 		try {
 			uri = URLDecoder.decode(uri, configuration.getUriEncoding());
 		} catch (UnsupportedEncodingException e) {
@@ -62,7 +61,7 @@ public class RequestMapping {
 			return findClasspathResource(StringUtils.substring(uri, CP_PREFIX.length()));
 		}
 		
-		String path = configuration.getWebRoot() + File.separatorChar + uri;
+		String path = configuration.getWebRoot() + uri;
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("mapping uri: %s to: %s", uri, path));
 		}

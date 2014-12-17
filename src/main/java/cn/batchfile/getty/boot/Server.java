@@ -3,6 +3,9 @@ package cn.batchfile.getty.boot;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
 
 import org.apache.commons.vfs2.FileChangeEvent;
 import org.apache.commons.vfs2.FileListener;
@@ -14,6 +17,7 @@ import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.impl.DefaultFileMonitor;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
@@ -21,6 +25,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 import cn.batchfile.getty.binding.Application;
 import cn.batchfile.getty.configuration.Configuration;
+import cn.batchfile.getty.filter.FilterListener;
 import cn.batchfile.getty.mvc.RequestMapping;
 import cn.batchfile.getty.mvc.Rewriter;
 import cn.batchfile.getty.servlet.ApplicationListener;
@@ -57,25 +62,30 @@ public class Server {
 		applicationListener.stop();
 	}
 	
-	private void startJetty(Configuration configuration) throws Exception {
+	private void startJetty(final Configuration configuration) throws Exception {
 		// create jetty server
 		final org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(
 				configuration.getPort());
 		setRuntimeParameters(server, configuration);
 		
 		// load rewriter mapper
-		final String webDirectory = configuration.getWebRoot();
+		//final String webRoot = ;
+		File webRoot = new File(configuration.getWebRoot());
 		final Rewriter rewriter = new Rewriter();
-		rewriter.config(new File(webDirectory));
+		rewriter.config(webRoot);
 		
 		// load application listener
 		final ApplicationListener appListener = new ApplicationListener(configuration, Application.getInstance());
-		appListener.config(new File(webDirectory));
+		appListener.config(webRoot);
 		applicationListener = appListener;
 		
 		// load session listener
 		final SessionListener sessionListener = new SessionListener(configuration, Application.getInstance());
-		sessionListener.config(new File(webDirectory));
+		sessionListener.config(webRoot);
+		
+		// load filter manager
+		final FilterListener filterListener = new FilterListener(configuration, Application.getInstance());
+		filterListener.config(webRoot);
 		
 		// add file watcher on webapp
 		ConfigFileListener listener = new ConfigFileListener();
@@ -84,23 +94,24 @@ public class Server {
 		listener.setRewriter(rewriter);
 		listener.setApplicationListener(appListener);
 		listener.setSessionListener(sessionListener);
-		listener.setRoot(webDirectory);
+		listener.setFilterListener(filterListener);
+		listener.setRoot(configuration.getWebRoot());
 		fm.setDelay(2000);
 		fm.setRecursive(false);
-		FileObject file = VFS.getManager().resolveFile(webDirectory);
+		FileObject file = VFS.getManager().resolveFile(configuration.getWebRoot());
 		listener.addFile(fm, file);
 		
 		fm.start();
-		logger.info("add watcher on directory: " + webDirectory);
+		logger.info("add watcher on directory: " + configuration.getWebRoot());
 		
 		// setup webapp
 		WebAppContext context = new WebAppContext();
-		context.setContextPath(configuration.getContextPath());
-		context.setWar(webDirectory);
+		context.setContextPath("/");
+		context.setWar(configuration.getWebRoot());
 		context.setWelcomeFiles(configuration.getIndexPages());
 		context.setServer(server);
 		
-		HashLoginService loginService = new HashLoginService("TEST-SECURITY-REALM");
+		HashLoginService loginService = new HashLoginService("GETTY-SECURITY-REALM");
 		context.getSecurityHandler().setLoginService(loginService);
 		server.setHandler(context);
 		
@@ -111,6 +122,10 @@ public class Server {
 		
 		// set session listener
 		context.addEventListener(sessionListener);
+		
+		// set filter
+		EnumSet<DispatcherType> dts = EnumSet.of(DispatcherType.REQUEST);
+		context.addFilter(new FilterHolder(filterListener), "*", dts);
 		
 		// kick off http service
 		server.start();
@@ -145,6 +160,7 @@ public class Server {
 		private Rewriter rewriter;
 		private ApplicationListener applicationListener;
 		private SessionListener sessionListener;
+		private FilterListener filterListener;
 		private String root;
 		
 		public void setFileMonitor(FileMonitor fileMonitor) {
@@ -166,6 +182,10 @@ public class Server {
 		public void setSessionListener(SessionListener sessionListener) {
 			this.sessionListener = sessionListener;
 		}
+		
+		public void setFilterListener(FilterListener filterListener) {
+			this.filterListener = filterListener;
+		}
 
 		public void setRoot(String root) {
 			this.root = root;
@@ -175,12 +195,8 @@ public class Server {
 		public void fileChanged(FileChangeEvent event) throws Exception {
 			if (event.getFile().getType() == FileType.FOLDER) {
 				addFile(fileMonitor, event.getFile());
-			} else if (event.getFile().getName().getBaseName().equals(Rewriter.CONFIG_FILE)) {
-				rewriter.config(new File(root));
-			} else if (event.getFile().getName().getBaseName().equals(ApplicationListener.CONFIG_FILE)) {
-				applicationListener.config(new File(root));
-			} else if (event.getFile().getName().getBaseName().equals(SessionListener.CONFIG_FILE)) {
-				sessionListener.config(new File(root));
+			} else {
+				onChange(event.getFile());
 			}
 		}
 
@@ -188,12 +204,8 @@ public class Server {
 		public void fileCreated(FileChangeEvent event) throws Exception {
 			if (event.getFile().getType() == FileType.FOLDER) {
 				addFile(fileMonitor, event.getFile());
-			} else if (event.getFile().getName().getBaseName().equals(Rewriter.CONFIG_FILE)) {
-				rewriter.config(new File(root));
-			} else if (event.getFile().getName().getBaseName().equals(ApplicationListener.CONFIG_FILE)) {
-				applicationListener.config(new File(root));
-			} else if (event.getFile().getName().getBaseName().equals(SessionListener.CONFIG_FILE)) {
-				sessionListener.config(new File(root));
+			} else {
+				onChange(event.getFile());
 			}
 		}
 
@@ -201,12 +213,8 @@ public class Server {
 		public void fileDeleted(FileChangeEvent event) throws Exception {
 			if (event.getFile().getType() == FileType.FOLDER) {
 				fileMonitor.removeFile(event.getFile());
-			} else if (event.getFile().getName().getBaseName().equals(Rewriter.CONFIG_FILE)) {
-				rewriter.config(new File(root));
-			} else if (event.getFile().getName().getBaseName().equals(ApplicationListener.CONFIG_FILE)) {
-				applicationListener.config(new File(root));
-			} else if (event.getFile().getName().getBaseName().equals(SessionListener.CONFIG_FILE)) {
-				sessionListener.config(new File(root));
+			} else {
+				onChange(event.getFile());
 			}
 		}
 
@@ -217,6 +225,18 @@ public class Server {
 					addFile(fm, child);
 				}
 			} 
+		}
+		
+		private void onChange(FileObject file) throws Exception {
+			if (file.getName().getBaseName().equals(Rewriter.CONFIG_FILE)) {
+				rewriter.config(new File(root));
+			} else if (file.getName().getBaseName().equals(ApplicationListener.CONFIG_FILE)) {
+				applicationListener.config(new File(root));
+			} else if (file.getName().getBaseName().equals(SessionListener.CONFIG_FILE)) {
+				sessionListener.config(new File(root));
+			} else if (file.getName().getBaseName().equals(FilterListener.CONFIG_FILE)) {
+				filterListener.config(new File(root));
+			}
 		}
 	}
 }

@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import cn.batchfile.getty.binding.Application;
 import cn.batchfile.getty.configuration.Configuration;
+import cn.batchfile.getty.exceptions.ScriptException;
 
 public class ApplicationListener {
 
@@ -85,6 +86,7 @@ public class ApplicationListener {
 				}
 			} catch (Exception e) {
 				LOG.error(String.format("error when run script: %s", file.getAbsolutePath()), e);
+				throw new ScriptException(e);
 			}
 		} finally {
 			IOUtils.closeQuietly(stream);

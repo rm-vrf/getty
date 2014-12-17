@@ -90,35 +90,17 @@ public class Main {
 		}
 		
 		// 用绝对路径替换web root
-		String webRoot = getAbsoluttePath(baseDirectory, configuration.getWebRoot());
+		String webRoot = getAbsoluttePath(configuration.getWebRoot());
 		configuration.setWebRoot(webRoot);
 		
 		return configuration;
 	}
 	
-	private String getAbsoluttePath(String base, String dir) {
-		if (!isAbsolutePath(dir)) {
-			dir = base + IOUtils.DIR_SEPARATOR + dir;
-		}
+	private String getAbsoluttePath(String dir) {
 		File file = new File(dir);
 		return file.getAbsolutePath();
 	}
-	
-	private boolean isAbsolutePath(String path) {
-		if (StringUtils.startsWith(path, "/") || StringUtils.startsWith(path, "\\")) {
-			return true;
-		}
-		
-		if (IOUtils.DIR_SEPARATOR == '\\') {
-			logger.debug("running on windows system");
-			if (path.charAt(1) == ':') {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
+
 	private String getValue(String arg, String prefix) {
 		prefix = "--" + prefix + "=";
 		if (StringUtils.startsWith(arg, prefix)) {

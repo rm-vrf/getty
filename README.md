@@ -97,7 +97,7 @@ $view.json(map)
 
 - 实现了URL Rewrite，看samples目录里面的_rewrite.json
 - 实现了应用启动脚本，看sample目录里的_application.json
-- 实现了Sessio Create和Session Destroy绑定脚本
+- 实现了Session Create和Session Destroy绑定脚本
 
 文件上传还没实现，再等等。
 
@@ -107,3 +107,8 @@ $view.json(map)
 - 过滤器（Filter）还没有实现，很多应用也是需要的
 - 文件上传，还是要搞的
 - 调试和开发方面，需要在Eclipse里面做调试插件和代码提示插件
+
+12月17日
+----------
+
+今天完成了过滤器，现在是一个功能完整的单机版Web服务器了。接下来要做发布了，要写一些说明文档。
