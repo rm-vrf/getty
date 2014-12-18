@@ -48,30 +48,13 @@ public class Rewriter {
 	public String mapping(HttpServletRequest request, Map<String, Object> vars) throws RewriteMappingException {
 		
 		//检查uri模式
-		Pattern pattern = getPatternByUri(request.getRequestURI(), vars);
+		Pattern pattern = getPattern(request.getRequestURI(), request.getMethod(), getHeaders(request), vars);
 		if (pattern == null) {
 			return null;
 		}
+		
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("match uri pattern: " + pattern.getPattern() + " with path vars: " + vars.toString());
-		}
-		
-		//检查method
-		if (!matchMethod(pattern.getMethods(), request.getMethod())) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("method mismatch");
-			}
-			String message = String.format("method %s not support for uri %s", request.getMethod(), pattern.getUri());
-			throw new RewriteMappingException(message);
-		}
-		
-		//检查消息头
-		if (!matchHeader(pattern.getHeaders(), getHeaders(request))) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("header mismatch");
-			}
-			String message = String.format("header not support for uri %s", pattern.getUri());
-			throw new RewriteMappingException(message);
 		}
 		
 		return replacePlaceHolder(pattern.getUri(), vars);
@@ -121,11 +104,13 @@ public class Rewriter {
 		}
 	}
 	
-	private Pattern getPatternByUri(String uri, Map<String, Object> vars) {
+	private Pattern getPattern(String uri, String method, Map<String, String> headers, Map<String, Object> vars) {
 		List<String> requestParts = getParts(uri);
 		for (Pattern pattern : patterns) {
 			vars.clear();
-			if (matchUri(pattern.getParts(), requestParts, vars)) {
+			if (matchUri(pattern.getParts(), requestParts, vars) 
+					&& matchMethod(pattern.getMethods(), method) 
+					&& matchHeader(pattern.getHeaders(), headers)) {
 				return pattern;
 			}
 		}
