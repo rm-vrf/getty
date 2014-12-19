@@ -1,8 +1,12 @@
 package cn.batchfile.getty.binding;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.IOUtils;
 
 public class Response {
 
@@ -43,6 +47,21 @@ public class Response {
 	
 	public Response println(Object object) throws IOException {
 		servletResponse.getWriter().println(object);
+		return this;
+	}
+	
+	public Response write(InputStream inputStream) throws IOException {
+		IOUtils.copy(inputStream, servletResponse.getOutputStream());
+		return this;
+	}
+	
+	public Response write(byte[] data) throws IOException {
+		IOUtils.write(data, servletResponse.getOutputStream());
+		return this;
+	}
+	
+	public Response write(Reader reader) throws IOException {
+		IOUtils.copy(reader, servletResponse.getOutputStream());
 		return this;
 	}
 	
