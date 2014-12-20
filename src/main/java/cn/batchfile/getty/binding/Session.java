@@ -30,6 +30,11 @@ public class Session {
 		return session.getMaxInactiveInterval();
 	}
 	
+	public Session setMaxInactiveInterval(int maxInactiveInterval) {
+		session.setMaxInactiveInterval(maxInactiveInterval);
+		return this;
+	}
+	
 	public ServletContext getServletContext() {
 		return session.getServletContext();
 	}

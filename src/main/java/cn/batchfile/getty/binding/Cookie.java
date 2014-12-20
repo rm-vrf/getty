@@ -20,7 +20,7 @@ public class Cookie implements Map<String, javax.servlet.http.Cookie> {
 		this.response = response;
 	}
 
-	public Map<String, javax.servlet.http.Cookie> map() {
+	private Map<String, javax.servlet.http.Cookie> map() {
 		Map<String, javax.servlet.http.Cookie> map = new HashMap<String, javax.servlet.http.Cookie>();
 		javax.servlet.http.Cookie[] cookies = request.getCookies();
 		if (cookies != null) {

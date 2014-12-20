@@ -19,18 +19,21 @@ public class View {
 		this.response = response;
 	}
 	
-	public void redirect(String location) throws IOException {
+	public View redirect(String location) throws IOException {
 		response.sendRedirect(location);
+		return this;
 	}
 
-	public void jsp(String view) throws ServletException, IOException {
+	public View jsp(String view) throws ServletException, IOException {
 		RequestDispatcher dispatcher = request.getRequestDispatcher(view);
 		dispatcher.forward(request, response);
+		return this;
 	}
 	
-	public void json(Object object) throws IOException {
+	public View json(Object object) throws IOException {
 		response.setContentType("application/json");
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.writeValue(response.getWriter(), object);
+		return this;
 	}
 }

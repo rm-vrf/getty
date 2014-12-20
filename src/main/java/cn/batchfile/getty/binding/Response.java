@@ -3,6 +3,7 @@ package cn.batchfile.getty.binding;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,6 +41,24 @@ public class Response {
 		return responseHeaderMap;
 	}
 	
+	public int getStatus() {
+		return servletResponse.getStatus();
+	}
+	
+	public Response setStatus(int status) {
+		servletResponse.setStatus(status);
+		return this;
+	}
+	
+	public String getLocale() {
+		return servletResponse.getLocale().toString();
+	}
+	
+	public Response setLocale(String locale) {
+		servletResponse.setLocale(new Locale(locale));
+		return this;
+	}
+	
 	public Response print(Object object) throws IOException {
 		servletResponse.getWriter().print(object);
 		return this;
@@ -72,6 +91,11 @@ public class Response {
 
 	public Response error(int code) throws IOException {
 		servletResponse.sendError(code);
+		return this;
+	}
+	
+	public Response redirect(String location) throws IOException {
+		servletResponse.sendRedirect(location);
 		return this;
 	}
 }
