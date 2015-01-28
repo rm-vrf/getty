@@ -13,9 +13,9 @@ Groovy on Jetty!
 Getty是一个运行Groovy脚本的Web服务器。
 程序员可以采用Java编写业务代码，编译成jar包，使用Groovy联调，在Getty中快速部署。部署和修改不需要重新编译和启动。适合用来快速开发原型系统，或者代码量小于100万行的小型系统。
 
-下载地址
+发布地址
 
-http://www.batchfile.cn/release/getty-1.0.2.tar.gz
+https://github.com/lane-cn/getty/releases
 
 支持功能
 
