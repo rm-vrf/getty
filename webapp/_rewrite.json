@@ -1,0 +1,7 @@
+[
+	{
+		"pattern": "/smb/{ip}/{date}/{file}",
+		"method": "GET",
+		"uri": "/smb.groovy"
+	}
+]
