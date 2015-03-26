@@ -106,6 +106,7 @@ public class Server {
 		
 		// setup webapp
 		WebAppContext context = new WebAppContext();
+		context.setMaxFormContentSize(Integer.MAX_VALUE);
 		context.setContextPath("/");
 		context.setWar(configuration.getWebRoot());
 		context.setWelcomeFiles(configuration.getIndexPages());
