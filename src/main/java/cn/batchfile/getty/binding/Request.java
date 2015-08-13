@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,9 +16,13 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 public class Request {
 	private static final Logger logger = Logger.getLogger(Request.class);
+	private Map<String, MultipartFile> files;
 	private HttpServletRequest servletRequest;
 	private RequestHeaderMap requestHeaderMap;
 	private RequestParameterMap requestParameterMap;
@@ -25,7 +30,18 @@ public class Request {
 	private boolean bodyInited;
 	
 	public Request(HttpServletRequest servletRequest) {
-		this.servletRequest = servletRequest;
+		this(servletRequest, null);
+	}
+	
+	public Request(HttpServletRequest servletRequest, CommonsMultipartResolver multipartResolver) {
+		if (multipartResolver != null && multipartResolver.isMultipart(servletRequest)) {
+			MultipartHttpServletRequest mpr = multipartResolver.resolveMultipart(servletRequest);
+			files = mpr.getFileMap();
+			this.servletRequest = mpr;
+		} else {
+			this.servletRequest = servletRequest;
+		}
+		
 		requestHeaderMap = new RequestHeaderMap(this.servletRequest);
 		requestParameterMap = new RequestParameterMap(this.servletRequest);
 	}
@@ -113,6 +129,14 @@ public class Request {
 	
 	public RequestParameterMap getParameters() {
 		return requestParameterMap;
+	}
+	
+	public List<MultipartFile> getFiles() {
+		List<MultipartFile> list = new ArrayList<MultipartFile>();
+		for (MultipartFile file : files.values()) {
+			list.add(file);
+		}
+		return list;
 	}
 	
 	public Object getBody() throws IOException {

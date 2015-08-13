@@ -4,6 +4,5 @@ if (!(j > 0)) {
 }
 j ++
 $session.attributes.counter = j
-$response.println('session id: ' + $session.id)
-$response.println('<br/>')
-$response.println('session visit count: ' + j)
+$response.println("session id: ${$session.id} <br/>")
+$response.println("session visit count: ${j}")

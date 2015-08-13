@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import cn.batchfile.getty.binding.Application;
 import cn.batchfile.getty.binding.Cookie;
@@ -31,9 +32,13 @@ public class GroovyParser extends Parser {
 	
 	private static final Logger logger = Logger.getLogger(GroovyParser.class);
 	private Configuration configuration;
+	private CommonsMultipartResolver multipartResolver;
 	
 	public GroovyParser(Configuration configuration) {
 		this.configuration = configuration;
+		multipartResolver = new CommonsMultipartResolver();
+		multipartResolver.setMaxUploadSize(-1);
+		multipartResolver.setDefaultEncoding("UTF-8");
 	}
 
 	@Override
@@ -42,7 +47,7 @@ public class GroovyParser extends Parser {
 		
 		//binding object
 		Application _application = Application.getInstance();
-		Request _request = new Request(request);
+		Request _request = new Request(request, multipartResolver);
 		Response _response = new Response(response);
 		Session _session = new Session(request);
 		Cookie _cookie = new Cookie(request, response);

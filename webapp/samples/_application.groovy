@@ -1,7 +1,7 @@
 def start() {
-	$logger.info('start ' + $application.name);
+	$logger.info("start ${$application.name}");
 }
 
 def stop() {
-	$logger.info('stop ' + $application.name);
+	$logger.info("stop ${$application.name}");
 }

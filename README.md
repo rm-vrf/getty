@@ -38,9 +38,7 @@ Getty向Groovy脚本注入以下变量
 可以使用这些变量实现HTTP输入和输出的处理。例如，要从请求中获取所有的变量，输出到页面上，这样写：
 ```
 $request.parameters.each { param ->
-    $response.print param.key
-    $response.print ': '
-    $response.prinln param.value
+    $response.print "${param.key}: ${param.value}"
 }
 ```
 
