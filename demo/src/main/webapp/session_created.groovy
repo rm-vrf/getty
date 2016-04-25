@@ -1,0 +1,1 @@
+$logger.info "session created, id: ${$session.id}"

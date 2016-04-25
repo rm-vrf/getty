@@ -1,0 +1,36 @@
+application: demo
+version: alpha-001
+port: 8080
+
+handlers:
+  - url: /
+    script: home.groovy
+
+  - url: /doc/(year)/(id)
+    script: doc.groovy
+
+  - url: /stylesheets
+    static_dir: static/stylesheets
+
+  - url: /stylesheets/*
+    static_files: static/stylesheets/*
+
+  - url: /images/*
+    static_files: static/images/*
+    http_headers:
+      X-Foo-Header: foo
+      X-Bar-Header: bar value
+
+filters:
+  - url_pattern: /admin/*
+    script: filter.groovy
+
+listeners:
+  - start: app_start.groovy
+    stop: app_stop.groovy
+
+error_handlers:
+  - file: default_error.html
+  
+  - error_code: 404
+    file: over_quota.html

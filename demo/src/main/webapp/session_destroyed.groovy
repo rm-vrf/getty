@@ -1,0 +1,1 @@
+$logger.info "session destroyed, id: ${$session.id}"

@@ -1,0 +1,4 @@
+cron:
+  - description: test target
+    script: tasks/hello_task.groovy
+    schedule: 0 */1 * * * ?

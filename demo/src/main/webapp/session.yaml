@@ -1,0 +1,5 @@
+timeout: 20
+
+listeners:
+  - created: session_created.groovy
+    destroyed: session_destroyed.groovy
