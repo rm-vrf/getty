@@ -49,7 +49,7 @@ public class ApplicationInstanceManager {
 		ClassLoader cl = createClassLoader(application);
 
 		//create servlet
-		ServletManager servletManager = createServletManager(application, cl);
+		ServletManager servletManager = createServletManager(application, ai, cl);
 		
 		//apply servlet
 		context.addServlet(new ServletHolder(servletManager), "/");
@@ -84,12 +84,13 @@ public class ApplicationInstanceManager {
 		return cl;
 	}
 
-	private ServletManager createServletManager(Application application, ClassLoader classLoader) {
+	private ServletManager createServletManager(Application application, ApplicationInstance instance, ClassLoader classLoader) {
 		MappingManager mapping = new MappingManager();
 		mapping.setApplication(application);
 		
 		ServletManager servlet = new ServletManager();
 		servlet.setApplication(application);
+		servlet.setApplicationInstance(instance);
 		servlet.setMappingManager(mapping);
 		servlet.setClassLoader(classLoader);
 		

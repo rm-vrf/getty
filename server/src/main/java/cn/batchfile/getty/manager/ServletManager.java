@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import cn.batchfile.getty.application.Application;
+import cn.batchfile.getty.application.ApplicationInstance;
 import cn.batchfile.getty.application.Handler;
 import cn.batchfile.getty.binding.Cookie;
 import cn.batchfile.getty.binding.Model;
@@ -42,6 +43,7 @@ public class ServletManager implements Servlet {
 	private static final Logger logger = Logger.getLogger(ServletManager.class);
 	private MappingManager mappingManager;
 	private Application application;
+	private ApplicationInstance applicationInstance;
 	private MimeTypes mimeTypes = new MimeTypes();
 	private ClassLoader classLoader;
 
@@ -59,6 +61,14 @@ public class ServletManager implements Servlet {
 
 	public void setApplication(Application application) {
 		this.application = application;
+	}
+
+	public ApplicationInstance getApplicationInstance() {
+		return applicationInstance;
+	}
+
+	public void setApplicationInstance(ApplicationInstance applicationInstance) {
+		this.applicationInstance = applicationInstance;
 	}
 
 	public ClassLoader getClassLoader() {
@@ -173,12 +183,12 @@ public class ServletManager implements Servlet {
 	
 	private void printHead(File dir, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String title = request.getRequestURI();
-		response.getWriter().println(String.format("<HTML><HEAD><TITLE>Directory: %s</TITLE></HEAD><BODY>", title));
-		response.getWriter().println(String.format("<H1>Directory: %s</H1>", title));
+		response.getWriter().println(String.format("<html><head><title>Directory: %s</title></head><body>", title));
+		response.getWriter().println(String.format("<h1>Directory: %s</h1>", title));
 	}
 
 	private void printTableHead(File dir, HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.getWriter().println("<TABLE BORDER=0>");
+		response.getWriter().println("<table border=\"0\">");
 	}
 
 	private void printTableBody(File dir, HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -194,16 +204,16 @@ public class ServletManager implements Servlet {
 			String name = file.getName() + (file.isDirectory() ? "/" : StringUtils.EMPTY);
 			long length = file.length();
 			String time = df.format(new Date(file.lastModified()));
-			response.getWriter().println(String.format("<TR><TD><A HREF=\"%s\">%s&nbsp;</A></TD><TD ALIGN=right>%s bytes&nbsp;</TD><TD>%s</TD></TR>", uri, name, length, time));
+			response.getWriter().println(String.format("<tr><td><a href=\"%s\">%s&nbsp;</a></td><td align=\"right\">%s bytes&nbsp;</td><td>%s</td></tr>", uri, name, length, time));
 		}
 	}
 	
 	private void printTableTail(File dir, HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.getWriter().println("</TABLE>");
+		response.getWriter().println("</table>");
 	}
 	
 	private void printTail(File dir, HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.getWriter().println("</BODY></HTML>");
+		response.getWriter().println("</body></html>");
 	}
 	
 	private void outputStatic(File file, HttpServletRequest request, HttpServletResponse response, Map<String, Object> vars) throws IOException {
@@ -236,8 +246,8 @@ public class ServletManager implements Servlet {
 		
 		//binding inner object
 		Binding binding = new Binding();
-		binding.setProperty("$application", application);
-		binding.setProperty("$app", application);
+		binding.setProperty("$application", applicationInstance);
+		binding.setProperty("$app", applicationInstance);
 		binding.setProperty("$request", bindingRequest);
 		binding.setProperty("$req", bindingRequest);
 		binding.setProperty("$response", bindingResponse);
