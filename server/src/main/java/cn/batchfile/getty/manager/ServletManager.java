@@ -43,6 +43,7 @@ public class ServletManager implements Servlet {
 	private MappingManager mappingManager;
 	private Application application;
 	private MimeTypes mimeTypes = new MimeTypes();
+	private ClassLoader classLoader;
 
 	public MappingManager getMappingManager() {
 		return mappingManager;
@@ -58,6 +59,14 @@ public class ServletManager implements Servlet {
 
 	public void setApplication(Application application) {
 		this.application = application;
+	}
+
+	public ClassLoader getClassLoader() {
+		return classLoader;
+	}
+
+	public void setClassLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
 	}
 
 	@Override
@@ -259,7 +268,7 @@ public class ServletManager implements Servlet {
 		
 		//execute script file
 		String text = FileUtils.readFileToString(file, application.getFileEncoding());
-		GroovyShell shell = new GroovyShell(this.getClass().getClassLoader(), binding);
+		GroovyShell shell = new GroovyShell(classLoader, binding);
 		Object r = shell.evaluate(text, file.getName());
 		if (logger.isDebugEnabled()) {
 			logger.debug("shell return value: " + r);

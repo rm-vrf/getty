@@ -10,6 +10,7 @@ public class ApplicationInstance {
 	private int port = 0;
 	private Date startTime;
 	private Map<String, Object> attributes;
+	private ClassLoader classLoader;
 	
 	public ApplicationInstance() {
 		attributes = new ConcurrentHashMap<String, Object>();
@@ -45,5 +46,13 @@ public class ApplicationInstance {
 
 	public void setAttributes(Map<String, Object> attributes) {
 		this.attributes = attributes;
+	}
+
+	public ClassLoader getClassLoader() {
+		return classLoader;
+	}
+
+	public void setClassLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
 	}
 }

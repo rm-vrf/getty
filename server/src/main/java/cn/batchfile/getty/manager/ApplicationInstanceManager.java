@@ -1,7 +1,12 @@
 package cn.batchfile.getty.manager;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -15,13 +20,14 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 import cn.batchfile.getty.application.Application;
 import cn.batchfile.getty.application.ApplicationInstance;
+import cn.batchfile.getty.lang.ApplicationClassLoader;
 
 public class ApplicationInstanceManager {
 	
 	private static final Logger logger = Logger.getLogger(ApplicationInstanceManager.class);
 	private Map<String, Server> servers = new HashMap<String, Server>();
 
-	public ApplicationInstance start(Application application) {
+	public ApplicationInstance start(Application application) throws MalformedURLException {
 		ApplicationInstance ai = new ApplicationInstance();
 		ai.setApplication(application);
 		ai.setStartTime(new Date());
@@ -39,9 +45,12 @@ public class ApplicationInstanceManager {
 		context.getSecurityHandler().setLoginService(loginService);
 		server.setHandler(context);
 		
-		//create servlet
-		ServletManager servletManager = createServletManager(application);
+		//create classloader
+		ClassLoader cl = createClassLoader(application);
 
+		//create servlet
+		ServletManager servletManager = createServletManager(application, cl);
+		
 		//apply servlet
 		context.addServlet(new ServletHolder(servletManager), "/");
 		try {
@@ -57,13 +66,32 @@ public class ApplicationInstanceManager {
 		return ai;
 	}
 	
-	private ServletManager createServletManager(Application application) {
+	private ClassLoader createClassLoader(Application application) throws MalformedURLException {
+		//构建classpath
+		List<File> classpath = new ArrayList<File>();
+		classpath.add(application.getClasses());
+		for (File lib : application.getLibs()) {
+			classpath.add(lib);
+		}
+		
+		URL[] urls = new URL[classpath.size()];
+		for (int i = 0; i < classpath.size(); i ++) {
+			urls[i] = classpath.get(i).toURI().toURL();
+		}
+		
+		//构建classloader
+		ApplicationClassLoader cl = new ApplicationClassLoader(urls, getClass().getClassLoader());
+		return cl;
+	}
+
+	private ServletManager createServletManager(Application application, ClassLoader classLoader) {
 		MappingManager mapping = new MappingManager();
 		mapping.setApplication(application);
 		
 		ServletManager servlet = new ServletManager();
 		servlet.setApplication(application);
 		servlet.setMappingManager(mapping);
+		servlet.setClassLoader(classLoader);
 		
 		return servlet;
 	}
