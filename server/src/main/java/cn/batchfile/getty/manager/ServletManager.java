@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -20,7 +21,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -36,7 +36,9 @@ import cn.batchfile.getty.binding.Session;
 import cn.batchfile.getty.binding.View;
 import cn.batchfile.getty.util.MimeTypes;
 import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
+import groovy.util.GroovyScriptEngine;
+import groovy.util.ResourceException;
+import groovy.util.ScriptException;
 
 public class ServletManager implements Servlet {
 	
@@ -46,6 +48,7 @@ public class ServletManager implements Servlet {
 	private ApplicationInstance applicationInstance;
 	private MimeTypes mimeTypes = new MimeTypes();
 	private ClassLoader classLoader;
+	private Map<String, GroovyScriptEngine> gses = new ConcurrentHashMap<String, GroovyScriptEngine>();
 
 	public MappingManager getMappingManager() {
 		return mappingManager;
@@ -235,7 +238,7 @@ public class ServletManager implements Servlet {
 		}
 	}
 	
-	private void outputGroovy(File file, HttpServletRequest request, HttpServletResponse response, Map<String, Object> vars) throws IOException {
+	private void outputGroovy(File file, HttpServletRequest request, HttpServletResponse response, Map<String, Object> vars) {
 		Request bindingRequest = new Request(request, null);
 		Response bindingResponse = new Response(response);
 		Session bindingSession = new Session(request);
@@ -262,6 +265,7 @@ public class ServletManager implements Servlet {
 		binding.setProperty("$v", bindingView);
 		binding.setProperty("$logger", bindingLogger);
 		binding.setProperty("$log", bindingLogger);
+		binding.setProperty("$vars", vars);
 
 		//binding path vars
 		for (Entry<String, Object> entry : vars.entrySet()) {
@@ -277,17 +281,38 @@ public class ServletManager implements Servlet {
 		response.setCharacterEncoding(application.getCharsetEncoding());
 		
 		//execute script file
-		String text = FileUtils.readFileToString(file, application.getFileEncoding());
-		GroovyShell shell = new GroovyShell(classLoader, binding);
-		Object r = shell.evaluate(text, file.getName());
-		if (logger.isDebugEnabled()) {
-			logger.debug("shell return value: " + r);
+		try {
+			GroovyScriptEngine gse = getGroovyScriptEngine(file);
+			Object r = gse.run(file.getName(), binding);
+			if (logger.isDebugEnabled()) {
+				logger.debug("shell return value: " + r);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("script exception: " + file.getName(), e);
+		} catch (ResourceException e) {
+			throw new RuntimeException("script exception: " + file.getName(), e);
+		} catch (ScriptException e) {
+			throw new RuntimeException("script exception: " + file.getName(), e);
 		}
 		
 		//process content-type
 		if (StringUtils.isEmpty(response.getContentType())) {
 			response.setContentType("text/html");
 		}
+	}
+	
+	private GroovyScriptEngine getGroovyScriptEngine(File file) throws IOException {
+		String key = file.getAbsolutePath();
+		if (!gses.containsKey(key)) {
+			synchronized (gses) {
+				if (!gses.containsKey(key)) {
+					String path = file.getParentFile().getAbsolutePath();
+					GroovyScriptEngine gse = new GroovyScriptEngine(path, classLoader);
+					gses.put(key, gse);
+				}
+			}
+		}
+		return gses.get(key);
 	}
 
 }
