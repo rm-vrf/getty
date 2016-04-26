@@ -36,17 +36,28 @@ public class Main {
 		List<File> appDirs = main.findAppDirs(baseDir, appsDir);
 		
 		//加载应用目录
-		ApplicationManager am = new ApplicationManager();
-		List<Application> applications = new ArrayList<Application>();
+		final ApplicationManager am = new ApplicationManager();
+		final List<Application> applications = new ArrayList<Application>();
 		for (File appDir : appDirs) {
 			applications.add(am.load(appDir));
 		}
 		
 		//启动应用
-		ApplicationInstanceManager aim = new ApplicationInstanceManager();
+		final ApplicationInstanceManager aim = new ApplicationInstanceManager();
 		for (Application application : applications) {
 			aim.start(application);
 		}
+		
+		//线程钩子
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				logger.info("stop getty");
+				for (Application application : applications) {
+					aim.stop(application.getName());
+					am.unload(application.getName());
+				}
+			}
+		});
 	}
 	
 	private List<File> findAppDirs(String baseDir, String appsDir) {

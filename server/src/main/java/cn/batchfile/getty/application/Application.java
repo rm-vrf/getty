@@ -6,9 +6,14 @@ import java.util.List;
 public class Application {
 
 	private File dir;
+	private File classes;
+	private List<File> libs;
 	private String name;
 	private String version;
+	private List<String> indexPages;
 	private int port = 0;
+	private String charsetEncoding = "utf-8";
+	private String fileEncoding = "utf-8";
 	private List<Handler> handlers;
 	private List<Filter> filters;
 	private List<ApplicationListener> listeners;
@@ -24,6 +29,22 @@ public class Application {
 		this.dir = dir;
 	}
 	
+	public File getClasses() {
+		return classes;
+	}
+
+	public void setClasses(File classes) {
+		this.classes = classes;
+	}
+
+	public List<File> getLibs() {
+		return libs;
+	}
+
+	public void setLibs(List<File> libs) {
+		this.libs = libs;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -40,6 +61,14 @@ public class Application {
 		this.version = version;
 	}
 	
+	public List<String> getIndexPages() {
+		return indexPages;
+	}
+
+	public void setIndexPages(List<String> indexPages) {
+		this.indexPages = indexPages;
+	}
+
 	public int getPort() {
 		return port;
 	}
@@ -48,6 +77,22 @@ public class Application {
 		this.port = port;
 	}
 	
+	public String getCharsetEncoding() {
+		return charsetEncoding;
+	}
+
+	public void setCharsetEncoding(String charsetEncoding) {
+		this.charsetEncoding = charsetEncoding;
+	}
+
+	public String getFileEncoding() {
+		return fileEncoding;
+	}
+
+	public void setFileEncoding(String fileEncoding) {
+		this.fileEncoding = fileEncoding;
+	}
+
 	public List<Handler> getHandlers() {
 		return handlers;
 	}

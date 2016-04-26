@@ -1,6 +1,6 @@
 application: demo
 version: alpha-001
-port: 8080
+port: 1025
 
 handlers:
   - url: /
@@ -8,15 +8,6 @@ handlers:
 
   - url: /doc/(year)/(id)
     script: doc.groovy
-
-  - url: /stylesheets
-    static_dir: static/stylesheets
-
-  - url: /stylesheets/*
-    static_files: static/stylesheets/*
-
-  - url: /images/*
-    static_files: static/images/*
     http_headers:
       X-Foo-Header: foo
       X-Bar-Header: bar value
@@ -34,3 +25,11 @@ error_handlers:
   
   - error_code: 404
     file: over_quota.html
+
+index_pages: 
+  - index.html
+  - index.htm
+  - index.groovy
+
+charset_encoding: utf-8
+file_encoding: utf-8

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.ho.yaml.Yaml;
 
@@ -30,8 +31,16 @@ public class ApplicationManager {
 		Application application = new Application();
 		application.setDir(dir);
 		
+		//classes & lib
+		loadClasspath(application, dir);
+		
 		//解析app.yaml
 		loadApplication(application, new File(dir, "app.yaml"));
+		
+		//检查名称
+		if (applications.containsKey(application.getName())) {
+			throw new RuntimeException("Duplicate application name: " + application.getName());
+		}
 		
 		//解析cron.yaml
 		loadCrontab(application, new File(dir, "cron.yaml"));
@@ -48,6 +57,25 @@ public class ApplicationManager {
 		applications.remove(name);
 	}
 	
+	private void loadClasspath(Application application, File dir) {
+		File classes = new File(dir, "classes");
+		if (classes.exists() && classes.isDirectory()) {
+			application.setClasses(classes);
+		}
+		
+		application.setLibs(new ArrayList<File>());
+		File lib = new File(dir, "lib");
+		if (lib.exists() && lib.isDirectory()) {
+			File[] files = lib.listFiles();
+			for (File file : files) {
+				String name = file.getName().toLowerCase();
+				if (file.isFile() && (name.endsWith(".jar") || name.endsWith(".zip"))) {
+					application.getLibs().add(file);
+				}
+			}
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private void loadSession(Application application, File file) throws FileNotFoundException {
 		Map<String, Object> map = (Map<String, Object>)Yaml.load(file);
@@ -109,6 +137,23 @@ public class ApplicationManager {
 		if (map.containsKey("port")) {
 			application.setPort(Integer.valueOf(map.get("port").toString()));
 		}
+		if (map.containsKey("charset_encoding")) {
+			application.setCharsetEncoding(map.get("charset_encoding").toString());
+		}
+		if (map.containsKey("file_encoding")) {
+			application.setFileEncoding(map.get("file_encoding").toString());
+		}
+		
+		//默认页面
+		application.setIndexPages(new ArrayList<String>());
+		if (map.containsKey("index_pages")) {
+			List<String> ary = (List<String>)map.get("index_pages");
+			for (String s : ary) {
+				if (StringUtils.isNotEmpty(s)) {
+					application.getIndexPages().add(s);
+				}
+			}
+		}
 		
 		//控制器
 		application.setHandlers(new ArrayList<Handler>());
@@ -119,12 +164,6 @@ public class ApplicationManager {
 				handler.setUrl(element.get("url").toString());
 				if (element.containsKey("script")) {
 					handler.setScript(element.get("script").toString());
-				}
-				if (element.containsKey("static_dir")) {
-					handler.setStaticDir(element.get("static_dir").toString());
-				}
-				if (element.containsKey("static_files")) {
-					handler.setStaticFiles(element.get("static_files").toString());
 				}
 				if (element.containsKey("http_headers")) {
 					Map<String, String> headers = (Map<String, String>)element.get("http_headers");
