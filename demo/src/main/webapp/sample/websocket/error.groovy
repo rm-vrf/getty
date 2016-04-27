@@ -1,0 +1,1 @@
+$logger.error('error happen, session:' + $session.id, $e)

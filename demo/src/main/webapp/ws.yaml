@@ -1,0 +1,13 @@
+handlers:
+  - url: /test
+    script:
+      connect: sample/websocket/connect.groovy
+      close: sample/websocket/close.groovy
+      message: sample/websocket/message.groovy
+      error: sample/websocket/error.groovy
+    policy:
+      max_idle_time: 20
+      batch_mode: auto 
+      input_buffer_size: 1024
+      max_binary_message_size: 1024
+      max_text_message_size: 1024
