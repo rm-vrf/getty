@@ -43,6 +43,15 @@ import groovy.util.ScriptException;
 public class ServletManager implements Servlet {
 	
 	private static final Logger logger = Logger.getLogger(ServletManager.class);
+	private static final String[] FORBIDDEN_PAGES = new String[] {
+			"/classes", 
+			"/lib", 
+			"/app.yaml", 
+			"/cron.yaml", 
+			"/log.yaml", 
+			"/session.yaml", 
+			"/ws.yaml"};
+	
 	private MappingManager mappingManager;
 	private Application application;
 	private ApplicationInstance applicationInstance;
@@ -116,6 +125,12 @@ public class ServletManager implements Servlet {
 			uri = replaceVars(handler.getScript(), vars);
 		}
 		
+		//排除系统文件
+		if (isForbidden(uri)) {
+			response.sendError(403, "Forbidden");
+			return;
+		}
+		
 		//映射文件
 		File file = new File(application.getDir(), uri);
 		
@@ -137,6 +152,15 @@ public class ServletManager implements Servlet {
 		output(file, request, response, vars);
 	}
 	
+	private boolean isForbidden(String uri) {
+		for (String page : FORBIDDEN_PAGES) {
+			if (StringUtils.startsWith(uri, page)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private File getDefaultPage(File directory, List<String> defaultPages) {
 		for (String defaultPage : defaultPages) {
 			File file = new File(directory, defaultPage);

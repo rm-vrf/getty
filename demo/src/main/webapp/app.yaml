@@ -3,14 +3,14 @@ version: alpha-001
 port: 1025
 
 handlers:
-  - url: /
-    script: home.groovy
-
   - url: /doc/(year)/(id)
-    script: doc.groovy
+    script: sample/doc.groovy
     http_headers:
       X-Foo-Header: foo
       X-Bar-Header: bar value
+
+  - url: /sample/param
+    script: sample/param.groovy
 
 filters:
   - url_pattern: /admin/*
