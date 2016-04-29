@@ -69,7 +69,9 @@ public class ApplicationInstanceManager {
 	private ClassLoader createClassLoader(Application application) throws MalformedURLException {
 		//构建classpath
 		List<File> classpath = new ArrayList<File>();
-		classpath.add(application.getClasses());
+		if (application.getClasses() != null && application.getClasses().exists()) {
+			classpath.add(application.getClasses());
+		}
 		for (File lib : application.getLibs()) {
 			classpath.add(lib);
 		}

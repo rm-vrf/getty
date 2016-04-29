@@ -78,6 +78,10 @@ public class ApplicationManager {
 
 	@SuppressWarnings("unchecked")
 	private void loadSession(Application application, File file) throws FileNotFoundException {
+		if (!file.exists()) {
+			return;
+		}
+		
 		Map<String, Object> map = (Map<String, Object>)Yaml.load(file);
 		List<Map<String, Object>> list = null;
 		
@@ -104,6 +108,10 @@ public class ApplicationManager {
 	
 	@SuppressWarnings("unchecked")
 	private void loadCrontab(Application application, File file) throws FileNotFoundException {
+		if (!file.exists()) {
+			return;
+		}
+		
 		Map<String, Object> map = (Map<String, Object>)Yaml.load(file);
 		List<Map<String, Object>> list = null;
 		
