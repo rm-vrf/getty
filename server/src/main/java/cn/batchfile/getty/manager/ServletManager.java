@@ -24,16 +24,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.groovy.runtime.StringGroovyMethods;
 
 import cn.batchfile.getty.application.Application;
 import cn.batchfile.getty.application.ApplicationInstance;
 import cn.batchfile.getty.application.Handler;
 import cn.batchfile.getty.binding.Cookie;
-import cn.batchfile.getty.binding.Model;
 import cn.batchfile.getty.binding.Request;
 import cn.batchfile.getty.binding.Response;
 import cn.batchfile.getty.binding.Session;
-import cn.batchfile.getty.binding.View;
 import cn.batchfile.getty.util.MimeTypes;
 import groovy.lang.Binding;
 import groovy.util.GroovyScriptEngine;
@@ -44,13 +43,13 @@ public class ServletManager implements Servlet {
 	
 	private static final Logger logger = Logger.getLogger(ServletManager.class);
 	private static final String[] FORBIDDEN_PAGES = new String[] {
-			"/classes", 
-			"/lib", 
-			"/app.yaml", 
-			"/cron.yaml", 
-			"/log.yaml", 
-			"/session.yaml", 
-			"/ws.yaml"};
+			"classes", 
+			"lib", 
+			"app.yaml", 
+			"cron.yaml", 
+			"log.yaml", 
+			"session.yaml", 
+			"websocket.yaml"};
 	
 	private MappingManager mappingManager;
 	private Application application;
@@ -90,7 +89,7 @@ public class ServletManager implements Servlet {
 	public void setClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
-
+	
 	@Override
 	public void destroy() {
 		// pass
@@ -153,9 +152,12 @@ public class ServletManager implements Servlet {
 	}
 	
 	private boolean isForbidden(String uri) {
-		for (String page : FORBIDDEN_PAGES) {
-			if (StringUtils.startsWith(uri, page)) {
-				return true;
+		String[] array = StringUtils.split(uri, '/');
+		if (array.length > 0) {
+			for (String page : FORBIDDEN_PAGES) {
+				if (StringUtils.equals(page, array[0])) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -264,11 +266,9 @@ public class ServletManager implements Servlet {
 	
 	private void outputGroovy(File file, HttpServletRequest request, HttpServletResponse response, Map<String, Object> vars) {
 		Request bindingRequest = new Request(request, null);
-		Response bindingResponse = new Response(response);
+		Response bindingResponse = new Response(request, response);
 		Session bindingSession = new Session(request);
 		Cookie bindingCookie = new Cookie(request, response);
-		Model bindingModel = new Model(request);
-		View bindingView = new View(request, response);
 		Logger bindingLogger = Logger.getLogger(file.getName());
 		
 		//binding inner object
@@ -282,11 +282,6 @@ public class ServletManager implements Servlet {
 		binding.setProperty("$resp", bindingResponse);
 		binding.setProperty("$session", bindingSession);
 		binding.setProperty("$cookie", bindingCookie);
-		binding.setProperty("$model", bindingModel);
-		binding.setProperty("$mod", bindingModel);
-		binding.setProperty("$m", bindingModel);
-		binding.setProperty("$view", bindingView);
-		binding.setProperty("$v", bindingView);
 		binding.setProperty("$logger", bindingLogger);
 		binding.setProperty("$log", bindingLogger);
 		binding.setProperty("$vars", vars);

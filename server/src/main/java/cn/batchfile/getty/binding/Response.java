@@ -5,16 +5,22 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.Locale;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 
 public class Response {
 
+	private HttpServletRequest servletRequest;
 	private HttpServletResponse servletResponse;
 	private ResponseHeaderMap responseHeaderMap;
 	
-	public Response(HttpServletResponse servletResponse) {
+	public Response(HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+		this.servletRequest = servletRequest;
 		this.servletResponse = servletResponse;
 		this.responseHeaderMap = new ResponseHeaderMap(this.servletResponse);
 	}
@@ -96,6 +102,19 @@ public class Response {
 	
 	public Response redirect(String location) throws IOException {
 		servletResponse.sendRedirect(location);
+		return this;
+	}
+	
+	public Response json(Object object) throws IOException {
+		servletResponse.setContentType("application/json");
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.writeValue(servletResponse.getWriter(), object);
+		return this;
+	}
+
+	public Response jsp(String view) throws ServletException, IOException {
+		RequestDispatcher dispatcher = servletRequest.getRequestDispatcher(view);
+		dispatcher.forward(servletRequest, servletResponse);
 		return this;
 	}
 }

@@ -10,11 +10,11 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class Model implements Map<String, Object> {
+public class RequestAttributeMap implements Map<String, Object> {
 
 	private HttpServletRequest request;
 	
-	public Model(HttpServletRequest request) {
+	public RequestAttributeMap(HttpServletRequest request) {
 		this.request = request;
 	}
  

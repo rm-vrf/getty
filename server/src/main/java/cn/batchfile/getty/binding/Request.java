@@ -24,6 +24,7 @@ public class Request {
 	private static final Logger logger = Logger.getLogger(Request.class);
 	private Map<String, MultipartFile> files;
 	private HttpServletRequest servletRequest;
+	private RequestAttributeMap requestAttributeMap;
 	private RequestHeaderMap requestHeaderMap;
 	private RequestParameterMap requestParameterMap;
 	private Object body;
@@ -42,6 +43,7 @@ public class Request {
 			this.servletRequest = servletRequest;
 		}
 		
+		requestAttributeMap = new RequestAttributeMap(servletRequest);
 		requestHeaderMap = new RequestHeaderMap(this.servletRequest);
 		requestParameterMap = new RequestParameterMap(this.servletRequest);
 	}
@@ -123,6 +125,10 @@ public class Request {
 		return servletRequest.getCharacterEncoding();
 	}
 	
+	public RequestAttributeMap getAttributes() {
+		return requestAttributeMap;
+	}
+
 	public RequestHeaderMap getHeaders() {
 		return requestHeaderMap;
 	}

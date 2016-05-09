@@ -1,3 +1,3 @@
 def person = ['name': 'John', 'age': 18]
-$model.put('person', person)
-$view.jsp '/sample/jsp/mvc.jsp'
+$request.attributes['person'] = person
+$resp.jsp '/sample/jsp/mvc.jsp'

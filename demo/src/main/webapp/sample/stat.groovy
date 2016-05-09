@@ -9,4 +9,4 @@ map.env = System.getenv()
 map.prop = System.getProperties()
 map.jvm = jvm
 
-$view.json(map)
+$resp.json(map)

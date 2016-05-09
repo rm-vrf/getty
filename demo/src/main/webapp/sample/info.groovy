@@ -18,4 +18,4 @@ map.schema = $request.schema
 map.serverName = $request.serverName
 map.serverPort = $request.serverPort
 
-$view.json(map)
+$resp.json(map)

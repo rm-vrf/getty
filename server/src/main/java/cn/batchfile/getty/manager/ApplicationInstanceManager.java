@@ -53,6 +53,11 @@ public class ApplicationInstanceManager {
 		
 		//apply servlet
 		context.addServlet(new ServletHolder(servletManager), "/");
+		
+		//apply websocket
+		WebSocketManager socketManager = new WebSocketManager();
+		context.addServlet(new ServletHolder(socketManager), "*.ws");
+
 		try {
 			server.start();
 			int port = ((ServerConnector)server.getConnectors()[0]).getLocalPort();

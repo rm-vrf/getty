@@ -1,5 +1,7 @@
+url_pattern: *.ws
+
 handlers:
-  - url: /test
+  - url: /test.ws
     script:
       connect: sample/websocket/connect.groovy
       close: sample/websocket/close.groovy

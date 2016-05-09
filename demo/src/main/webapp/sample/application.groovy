@@ -10,4 +10,4 @@ $application.attributes.counter = i
 map.visitCount = $application.attributes.counter
 map.app = $application.application
 
-$view.json map
+$response.json map

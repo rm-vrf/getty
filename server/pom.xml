@@ -24,7 +24,7 @@
 		<java-version>1.7</java-version>
 		<org-springframework-version>3.1.0.RELEASE</org-springframework-version>
 		<org.slf4j-version>1.6.1</org.slf4j-version>
-		<jetty-version>9.1.5.v20140505</jetty-version>
+		<jetty-version>9.2.5.v20141112</jetty-version>
 	</properties>
 	<dependencies>
 		<!-- Logging -->
@@ -63,6 +63,11 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
+			<version>${jetty-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-server</artifactId>
 			<version>${jetty-version}</version>
 		</dependency>
 		<dependency>
