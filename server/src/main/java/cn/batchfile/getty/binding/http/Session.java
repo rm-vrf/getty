@@ -1,4 +1,4 @@
-package cn.batchfile.getty.binding;
+package cn.batchfile.getty.binding.http;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;

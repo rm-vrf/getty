@@ -1,24 +1,19 @@
-package cn.batchfile.getty.binding;
+package cn.batchfile.getty.binding.http;
 
 import java.util.Collection;
-import java.util.Enumeration;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-
-import cn.batchfile.getty.exceptions.InvalidOperationException;
-
-public class RequestParameterMap implements Map<String, Object> {
-
-	private static final Logger logger = Logger.getLogger(RequestParameterMap.class);
-	private HttpServletRequest servletRequest;
+public class ResponseHeaderMap implements Map<String, Object> {
 	
-	public RequestParameterMap(HttpServletRequest servletRequest) {
-		this.servletRequest = servletRequest;
+	private HttpServletResponse servletResponse;
+	
+	public ResponseHeaderMap(HttpServletResponse servletResponse) {
+		this.servletResponse = servletResponse;
 	}
 
 	@Override
@@ -48,22 +43,35 @@ public class RequestParameterMap implements Map<String, Object> {
 
 	@Override
 	public Object put(String name, Object value) {
-		throw new InvalidOperationException("request parameter cannot be changed");
+		if (value instanceof Date) {
+			servletResponse.addDateHeader(name, ((Date)value).getTime());
+		} else if (value instanceof Integer) {
+			servletResponse.addIntHeader(name, (Integer)value);
+		} else {
+			servletResponse.addHeader(name, value.toString());
+		}
+		return value;
 	}
 
 	@Override
 	public Object remove(Object name) {
-		throw new InvalidOperationException("request parameter cannot be changed");
+		Object value = get(name);
+		servletResponse.addHeader(name.toString(), null);
+		return value;
 	}
 
 	@Override
 	public void putAll(Map<? extends String, ? extends Object> values) {
-		throw new InvalidOperationException("request parameter cannot be changed");
+		for (Entry<? extends String, ? extends Object> entry : values.entrySet()) {
+			put(entry.getKey(), entry.getValue());
+		}
 	}
 
 	@Override
 	public void clear() {
-		throw new InvalidOperationException("request parameter cannot be changed");
+		for (String key : keySet()) {
+			remove(key);
+		}
 	}
 
 	@Override
@@ -82,15 +90,10 @@ public class RequestParameterMap implements Map<String, Object> {
 	}
 	
 	private Map<String, Object> map() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("content-type is: " + servletRequest.getContentType());
-		}
 		Map<String, Object> map = new HashMap<String, Object>();
-	
-		Enumeration<String> names = servletRequest.getParameterNames();
-		while (names.hasMoreElements()) {
-			String name = names.nextElement();
-			Object value = servletRequest.getParameter(name);
+		Collection<String> names = servletResponse.getHeaderNames();
+		for (String name : names) {
+			Object value = servletResponse.getHeader(name);
 			map.put(name, value);
 		}
 		return map;
