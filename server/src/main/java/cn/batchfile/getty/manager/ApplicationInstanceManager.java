@@ -55,8 +55,10 @@ public class ApplicationInstanceManager {
 		context.addServlet(new ServletHolder(servletManager), "/");
 		
 		//apply websocket
-		WebSocketManager socketManager = new WebSocketManager();
-		context.addServlet(new ServletHolder(socketManager), "*.ws");
+		if (application.getWebSocket() != null) {
+			WebSocketManager socketManager = createWebSocketManager(application, ai, cl);
+			context.addServlet(new ServletHolder(socketManager), application.getWebSocket().getUrlPattern());
+		}
 
 		try {
 			server.start();
@@ -89,6 +91,11 @@ public class ApplicationInstanceManager {
 		//构建classloader
 		ApplicationClassLoader cl = new ApplicationClassLoader(urls, getClass().getClassLoader());
 		return cl;
+	}
+	
+	private WebSocketManager createWebSocketManager(Application application, ApplicationInstance instance, ClassLoader classLoader) {
+		//TODO
+		return new WebSocketManager();
 	}
 
 	private ServletManager createServletManager(Application application, ApplicationInstance instance, ClassLoader classLoader) {

@@ -20,6 +20,8 @@ import cn.batchfile.getty.application.Filter;
 import cn.batchfile.getty.application.Handler;
 import cn.batchfile.getty.application.Session;
 import cn.batchfile.getty.application.SessionListener;
+import cn.batchfile.getty.application.WebSocket;
+import cn.batchfile.getty.application.WebSocketHandler;
 
 public class ApplicationManager {
 	
@@ -48,6 +50,9 @@ public class ApplicationManager {
 		//解析session.yaml
 		loadSession(application, new File(dir, "session.yaml"));
 		
+		//解析websocket.yaml
+		loadWebSocket(application, new File(dir, "websocket.yaml"));
+		
 		logger.info(String.format("load application from directory: %s, name: %s", dir, application.getName()));
 		applications.put(application.getName(), application);
 		return application;
@@ -72,6 +77,68 @@ public class ApplicationManager {
 				if (file.isFile() && (name.endsWith(".jar") || name.endsWith(".zip"))) {
 					application.getLibs().add(file);
 				}
+			}
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void loadWebSocket(Application application, File file) throws FileNotFoundException {
+		if (!file.exists()) {
+			return;
+		}
+		
+		Map<String, Object> map = (Map<String, Object>)Yaml.load(file);
+		List<Map<String, Object>> list = null;
+		
+		application.setWebSocket(new WebSocket());
+		if (map.containsKey("url_pattern")) {
+			application.getWebSocket().setUrlPattern(map.get("url_pattern").toString());
+		}
+		
+		application.getWebSocket().setHandlers(new ArrayList<WebSocketHandler>());
+		if (map.containsKey("handlers")) {
+			list = (List<Map<String, Object>>)map.get("handlers");
+			for (Map<String, Object> element : list) {
+				WebSocketHandler handler = new WebSocketHandler();
+				if (element.containsKey("url")) {
+					handler.setUrl(element.get("url").toString());
+				}
+				
+				if (element.containsKey("script")) {
+					Map<String, Object> tmp = (Map<String, Object>)element.get("script");
+					if (tmp.containsKey("connect")) {
+						handler.setConnect(tmp.get("connect").toString());
+					}
+					if (tmp.containsKey("close")) {
+						handler.setClose(tmp.get("close").toString());
+					}
+					if (tmp.containsKey("message")) {
+						handler.setMessage(tmp.get("message").toString());
+					}
+					if (tmp.containsKey("error")) {
+						handler.setError(tmp.get("error").toString());
+					}
+				}
+				
+				if (element.containsKey("policy")) {
+					Map<String, Object> tmp = (Map<String, Object>)element.get("policy");
+					if (tmp.containsKey("max_idle_time")) {
+						handler.setMaxIdleTime(Long.parseLong(tmp.get("max_idle_time").toString()));
+					}
+					if (tmp.containsKey("batch_mode")) {
+						handler.setBatchMode(tmp.get("batch_mode").toString());
+					}
+					if (tmp.containsKey("input_buffer_size")) {
+						handler.setInputBufferSize(Integer.parseInt(tmp.get("input_buffer_size").toString()));
+					}
+					if (tmp.containsKey("max_binary_message_size")) {
+						handler.setMaxBinaryMessageSize(Integer.parseInt(tmp.get("max_binary_message_size").toString()));
+					}
+					if (tmp.containsKey("max_text_message_size")) {
+						handler.setMaxTextMessageSize(Integer.parseInt(tmp.get("max_text_message_size").toString()));
+					}
+				}
+				application.getWebSocket().getHandlers().add(handler);
 			}
 		}
 	}

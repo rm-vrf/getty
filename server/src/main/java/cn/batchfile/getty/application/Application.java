@@ -20,6 +20,7 @@ public class Application {
 	private List<ErrorHandler> errorHandlers;
 	private Crontab crontab;
 	private Session session;
+	private WebSocket webSocket;
 	
 	public File getDir() {
 		return dir;
@@ -139,5 +140,13 @@ public class Application {
 
 	public void setSession(Session session) {
 		this.session = session;
+	}
+
+	public WebSocket getWebSocket() {
+		return webSocket;
+	}
+
+	public void setWebSocket(WebSocket webSocket) {
+		this.webSocket = webSocket;
 	}
 }
