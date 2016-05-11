@@ -1,49 +1,55 @@
 package cn.batchfile.getty.binding.http;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
+import cn.batchfile.getty.application.ApplicationInstance;
+
 public class Request {
 	private static final Logger logger = Logger.getLogger(Request.class);
-	private Map<String, MultipartFile> files;
 	private HttpServletRequest servletRequest;
 	private RequestAttributeMap requestAttributeMap;
 	private RequestHeaderMap requestHeaderMap;
 	private RequestParameterMap requestParameterMap;
 	private Object body;
-	private boolean bodyInited;
+	//private boolean bodyInited;
 	
-	public Request(HttpServletRequest servletRequest) {
-		this(servletRequest, null);
-	}
-	
-	public Request(HttpServletRequest servletRequest, CommonsMultipartResolver multipartResolver) {
-		if (multipartResolver != null && multipartResolver.isMultipart(servletRequest)) {
+	public Request(HttpServletRequest servletRequest, ApplicationInstance application) throws IOException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Content-Type: " + servletRequest.getContentType() + ", charset=" + servletRequest.getCharacterEncoding());
+		}
+		this.servletRequest = servletRequest;
+		
+		CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+		if (multipartResolver.isMultipart(servletRequest)) {
 			MultipartHttpServletRequest mpr = multipartResolver.resolveMultipart(servletRequest);
-			files = mpr.getFileMap();
 			this.servletRequest = mpr;
-		} else {
-			this.servletRequest = servletRequest;
+			body = mpr.getFileMap();
+		} else if (StringUtils.startsWithIgnoreCase(this.servletRequest.getContentType(), "application/json")) {
+			byte[] bytes = IOUtils.toByteArray(this.servletRequest.getInputStream());
+			String charset = this.servletRequest.getCharacterEncoding();
+			if (StringUtils.isEmpty(charset)) {
+				charset = application.getApplication().getCharsetEncoding();
+			}
+			String s = new String(bytes, charset);
+			
+			ObjectMapper mapper = new ObjectMapper();
+			body = mapper.readValue(s, Object.class);
 		}
 		
-		requestAttributeMap = new RequestAttributeMap(servletRequest);
+		requestAttributeMap = new RequestAttributeMap(this.servletRequest);
 		requestHeaderMap = new RequestHeaderMap(this.servletRequest);
 		requestParameterMap = new RequestParameterMap(this.servletRequest);
 	}
@@ -137,41 +143,34 @@ public class Request {
 		return requestParameterMap;
 	}
 	
-	public List<MultipartFile> getFiles() {
-		List<MultipartFile> list = new ArrayList<MultipartFile>();
-		for (MultipartFile file : files.values()) {
-			list.add(file);
-		}
-		return list;
-	}
-	
-	public Object getBody() throws IOException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("content-type is: " + servletRequest.getContentType());
-		}
-		if (!bodyInited) {
-			InputStream stream = null;
-			try {
-				stream = servletRequest.getInputStream();
-				List<String> lines = IOUtils.readLines(stream, getCharset());
-				String s = StringUtils.join(lines, IOUtils.LINE_SEPARATOR);
-				body = deserialize(s, servletRequest.getContentType());
-			} finally {
-				IOUtils.closeQuietly(stream);
-			}
-			bodyInited = true;
-		}
+	public Object getBody() {
 		return body;
+//		if (logger.isDebugEnabled()) {
+//			logger.debug("content-type is: " + servletRequest.getContentType());
+//		}
+//		if (!bodyInited) {
+//			InputStream stream = null;
+//			try {
+//				stream = servletRequest.getInputStream();
+//				List<String> lines = IOUtils.readLines(stream, getCharset());
+//				String s = StringUtils.join(lines, IOUtils.LINE_SEPARATOR);
+//				body = deserialize(s, servletRequest.getContentType());
+//			} finally {
+//				IOUtils.closeQuietly(stream);
+//			}
+//			bodyInited = true;
+//		}
+//		return body;
 	}
 
-	private Object deserialize(String s, String contentType) throws JsonParseException, JsonMappingException, IOException {
-		Object r = null;
-		if (StringUtils.equalsIgnoreCase("application/json", contentType)) {
-			ObjectMapper mapper = new ObjectMapper();
-			r = mapper.readValue(s, Object.class);
-		} else {
-			r = s;
-		}
-		return r;
-	}
+//	private Object deserialize(String s, String contentType) throws JsonParseException, JsonMappingException, IOException {
+//		Object r = null;
+//		if (StringUtils.equalsIgnoreCase("application/json", contentType)) {
+//			ObjectMapper mapper = new ObjectMapper();
+//			r = mapper.readValue(s, Object.class);
+//		} else {
+//			r = s;
+//		}
+//		return r;
+//	}
 }

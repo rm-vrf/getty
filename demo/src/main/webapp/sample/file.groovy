@@ -4,7 +4,7 @@ def up = $request.parameters.get('up')
 
 if (up == 'true') {
 	$response.println "Summary: ${$request.parameters.summary} <p/>"
-	$request.files.each {file->
+	$request.body.each {key,file->
 		$response.println "Empty: ${file.empty}, Name: ${file.name}, File Name: ${file.originalFilename}, "
 		$response.println "Content Type: ${file.contentType}, Size: ${file.size} <br/>"
 		//file.inputStream

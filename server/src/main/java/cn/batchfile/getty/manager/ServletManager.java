@@ -263,8 +263,8 @@ public class ServletManager implements Servlet {
 		}
 	}
 	
-	private void outputGroovy(File file, HttpServletRequest request, HttpServletResponse response, Map<String, Object> vars) {
-		Request bindingRequest = new Request(request, null);
+	private void outputGroovy(File file, HttpServletRequest request, HttpServletResponse response, Map<String, Object> vars) throws IOException {
+		Request bindingRequest = new Request(request, applicationInstance);
 		Response bindingResponse = new Response(request, response);
 		Session bindingSession = new Session(request);
 		Cookie bindingCookie = new Cookie(request, response);
