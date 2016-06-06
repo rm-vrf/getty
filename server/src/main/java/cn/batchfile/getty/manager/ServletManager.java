@@ -300,7 +300,7 @@ public class ServletManager implements Servlet {
 		
 		//execute script file
 		try {
-			GroovyScriptEngine gse = getGroovyScriptEngine(application, file);
+			GroovyScriptEngine gse = getGroovyScriptEngine(application);
 			Object r = gse.run(file.getAbsolutePath(), binding);
 			if (logger.isDebugEnabled()) {
 				logger.debug("shell return value: " + r);
@@ -319,7 +319,7 @@ public class ServletManager implements Servlet {
 		}
 	}
 	
-	private GroovyScriptEngine getGroovyScriptEngine(Application application, File file) throws IOException {
+	private GroovyScriptEngine getGroovyScriptEngine(Application application) throws IOException {
 		String key = application.getDir().getAbsolutePath();
 		if (!gses.containsKey(key)) {
 			synchronized (gses) {

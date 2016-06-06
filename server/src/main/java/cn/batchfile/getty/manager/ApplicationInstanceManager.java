@@ -94,8 +94,11 @@ public class ApplicationInstanceManager {
 	}
 	
 	private WebSocketManager createWebSocketManager(Application application, ApplicationInstance instance, ClassLoader classLoader) {
-		//TODO
-		return new WebSocketManager();
+		WebSocketManager wsm = new WebSocketManager();
+		wsm.setApplication(application);
+		wsm.setApplicationInstance(instance);
+		wsm.setClassLoader(classLoader);
+		return wsm;
 	}
 
 	private ServletManager createServletManager(Application application, ApplicationInstance instance, ClassLoader classLoader) {

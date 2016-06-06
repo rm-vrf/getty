@@ -1,94 +1,104 @@
 package cn.batchfile.getty.binding.socket;
 
-import java.util.List;
+import java.nio.charset.Charset;
+
+import org.apache.commons.lang.StringUtils;
 
 public class Request {
 
+	private org.eclipse.jetty.websocket.api.Session session;
+	private String text;
+	private RequestHeaderMap headers;
+	private RequestParameterMap parameters;
+	
+	public Request(org.eclipse.jetty.websocket.api.Session session, String text) {
+		this.session = session;
+		this.text = text;
+		headers = new RequestHeaderMap(session.getUpgradeRequest().getHeaders());
+		parameters = new RequestParameterMap(session.getUpgradeRequest().getParameterMap());
+	}
+	
 	public String getMethod() {
-		return null;
+		return session.getUpgradeRequest().getMethod();
 	}
 	
 	public String getQueryString() {
-		return null;
+		return session.getUpgradeRequest().getQueryString();
 	}
 	
 	public int getContentLength() {
-		return 0;
-	}
-	
-	public String getLocale() {
-		return null;
-	}
-	
-	public List<String> getLocales() {
-		return null;
+		return text.getBytes().length;
 	}
 	
 	public String getLocalAddress() {
-		return null;
+		return session.getLocalAddress().getAddress().getHostAddress();
 	}
 	
 	public String getLocalName() {
-		return null;
+		return session.getLocalAddress().getHostName();
 	}
 	
 	public int getLocalPort() {
-		return 0;
+		return session.getLocalAddress().getPort();
 	}
 	
 	public String getProtocol() {
-		return null;
+		return session.getUpgradeRequest().getRequestURI().getScheme();
 	}
 	
 	public String getRemoteUser() {
-		return null;
+		return session.getUpgradeRequest().getRequestURI().getUserInfo();
 	}
 	
 	public String getRemoteAddress() {
-		return null;
+		return session.getRemoteAddress().getAddress().getHostAddress();
 	}
 	
 	public String getRemoteHost() {
-		return null;
+		return session.getRemoteAddress().getHostName();
 	}
 	
 	public String getServerName() {
-		return null;
+		return session.getLocalAddress().getHostName();
 	}
 	
 	public int getServerPort() {
-		return 0;
+		return session.getLocalAddress().getPort();
 	}
 	
 	public String getSchema() {
-		return null;
+		return session.getUpgradeRequest().getRequestURI().getScheme();
 	}
 	
 	public String getUri() {
-		return null;
+		return session.getUpgradeRequest().getRequestURI().toString();
 	}
 	
 	public String getContentType() {
-		return null;
+		String contentType = session.getUpgradeRequest().getHeader("Content-Type");
+		contentType = StringUtils.substringBefore(contentType, ";");
+		return contentType;
 	}
 	
 	public String getCharset() {
-		return null;
+		String contentType = session.getUpgradeRequest().getHeader("Content-Type");
+		String charset = StringUtils.substringAfter(contentType, "charset=");
+		if (StringUtils.isEmpty(charset)) {
+			return Charset.defaultCharset().name();
+		} else {
+			return charset;
+		}
 	}
 	
-//	public RequestAttributeMap getAttributes() {
-//		return null;
-//	}
-//	
-//	public RequestHeaderMap getHeaders() {
-//		return null;
-//	}
-//	
-//	public RequestParameterMap getParameters() {
-//		return null;
-//	}
+	public RequestHeaderMap getHeaders() {
+		return headers;
+	}
+	
+	public RequestParameterMap getParameters() {
+		return parameters;
+	}
 	
 	public Object getBody() {
-		return null;
+		return text;
 	}
 }

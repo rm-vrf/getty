@@ -1,8 +1,10 @@
-import java.util.concurrent.*
-
 $log.info 'connect from client, session id: ' + $session.id
 
-def executor = Executors.newScheduledThreadPool(1)
-executor.scheduleAtFixedRate(()->{
-	$resp.println "It's my life."
-}, 0, 5, TimeUnit.SECONDS)
+Thread.start {
+	while (true) {
+		if ($session.attributes['status'] == 'start') {
+			$resp.print "It's my life. " + $session.id
+		}
+		Thread.sleep(2000L)
+	}
+}
