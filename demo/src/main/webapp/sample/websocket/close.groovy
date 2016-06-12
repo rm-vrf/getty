@@ -1,3 +1,1 @@
-//$log.info("connection closed, session: " + $session.id + ", statusCode: " + $code + ", reason: " + $reason)
-
-$log.info("connection closed, session: " + $session.id)
+$log.info("connection closed, session: " + $session.id + ", statusCode: " + $session.statusCode + ", statusReason: " + $session.statusReason)

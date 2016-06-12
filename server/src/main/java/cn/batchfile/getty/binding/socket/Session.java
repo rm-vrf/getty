@@ -38,16 +38,28 @@ public class Session {
 		return lastAccessedTime;
 	}
 	
+	public void setLastAccessedTime(long lastAccessedTime) {
+		this.lastAccessedTime = lastAccessedTime;
+	}
+
 	public Map<String, Object> getAttributes() {
 		return attributes;
 	}
 	
+	public int getStatusCode() {
+		return session.getUpgradeResponse().getStatusCode();
+	}
+
+	public String getStatusReason() {
+		return session.getUpgradeResponse().getStatusReason();
+	}
+
 	public void close() {
 		session.close();
 	}
 	
-	public void close(int statusCode, String reason) {
-		session.close(statusCode, reason);
+	public void close(int statusCode, String statusReason) {
+		session.close(statusCode, statusReason);
 	}
 	
 	public void setIdleTimeout(long ms) {
