@@ -6,7 +6,7 @@
 	<artifactId>getty-demo</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>getty-demo</name>
+	<name>demo</name>
 	<description>Groovy demo</description>
 	<licenses>
 		<license>
@@ -66,7 +66,7 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>getty-demo</finalName>
+		<finalName>${project.name}-${project.version}</finalName>
 		<resources>
 			<resource>
 				<filtering>true</filtering>

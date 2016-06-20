@@ -6,7 +6,7 @@
 	<artifactId>getty-server</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>getty-server</name>
+	<name>getty</name>
 	<description>Use Groovy in Jetty</description>
 	<licenses>
 		<license>
@@ -93,13 +93,6 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<version>${org-springframework-version}</version>
-			<exclusions>
-				<!-- Exclude Commons Logging in favor of SLF4j -->
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		
 		<dependency>
@@ -113,20 +106,12 @@
 			<version>2.2</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-vfs2</artifactId>
-			<version>2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-collections</groupId>
-			<artifactId>commons-collections</artifactId>
-			<version>3.2</version>
-		</dependency>
-		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
 			<version>1.2.2</version>
 		</dependency>
+		
+		<!-- json -->
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-core-asl</artifactId>
@@ -137,6 +122,8 @@
 			<artifactId>jackson-mapper-asl</artifactId>
 			<version>1.7.4</version>
 		</dependency>
+		
+		<!-- yaml -->
 		<dependency>
 			<groupId>org.jyaml</groupId>
 			<artifactId>jyaml</artifactId>
@@ -145,7 +132,7 @@
 
 	</dependencies>
 	<build>
-		<finalName>getty-server</finalName>
+		<finalName>${project.name}-${project.version}</finalName>
 		<resources>
 			<resource>
 				<filtering>true</filtering>
@@ -212,13 +199,6 @@
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.1</version>
-<!-- 				<configuration> -->
-<!-- 					<archive> -->
-<!-- 						<manifest> -->
-<!-- 							<mainClass>cn.batchfile.getty.Main</mainClass> -->
-<!-- 						</manifest> -->
-<!-- 					</archive> -->
-<!-- 				</configuration> -->
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -4,35 +4,35 @@
 	xsi:schemaLocation="http://maven.apache.org/plugins/mavenassembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
 	<id>GA</id>
 	<formats>
-		<format>dir</format>
 		<format>tar.gz</format>
 	</formats>
-	<dependencySets>
-		<dependencySet>
-			<useProjectArtifact>false</useProjectArtifact>
-			<outputDirectory>lib</outputDirectory>
-		</dependencySet>
-	</dependencySets>
 	<fileSets>
 		<fileSet>
 			<outputDirectory>lib</outputDirectory>
-			<directory>target</directory>
+			<directory>server/target/getty-${project.version}-GA/getty-${project.version}/lib</directory>
 			<includes>
-				<include>${project.name}-${project.version}.jar</include>
+				<include>**/*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
 			<outputDirectory>bin</outputDirectory>
-			<directory>src/main/resources/misc</directory>
+			<directory>server/target/getty-${project.version}-GA/getty-${project.version}/bin</directory>
 			<includes>
 				<include>**/*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
 			<outputDirectory>webapps</outputDirectory>
-			<directory>../</directory>
+			<directory>server/target/getty-${project.version}-GA/getty-${project.version}/webapps</directory>
 			<includes>
-				<include>*.md</include>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<outputDirectory>webapps/demo-${project.version}-GA</outputDirectory>
+			<directory>demo/target/demo-${project.version}-GA/demo-${project.version}</directory>
+			<includes>
+				<include>**/*</include>
 			</includes>
 		</fileSet>
 	</fileSets>
