@@ -17,7 +17,7 @@ done
 PRGDIR=`dirname "$PRG"`
 
 #####################
-# start
+# stop
 #####################
 
-"$PRGDIR"/ctl.sh start
+"$PRGDIR"/ctl.sh status

@@ -22,6 +22,13 @@
 			</includes>
 		</fileSet>
 		<fileSet>
+			<outputDirectory>tmp</outputDirectory>
+			<directory>server/target/getty-${project.version}-GA/getty-${project.version}/tmp</directory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
 			<outputDirectory>webapps</outputDirectory>
 			<directory>server/target/getty-${project.version}-GA/getty-${project.version}/webapps</directory>
 			<includes>
