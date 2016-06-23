@@ -45,6 +45,12 @@ public class ApplicationInstanceManager {
 		context.getSecurityHandler().setLoginService(loginService);
 		server.setHandler(context);
 		
+		//set session timeout
+		int minutes = application.getSession() == null ? 0 : application.getSession().getTimeout();
+		if (minutes > 0) {
+			context.getSessionHandler().getSessionManager().setMaxInactiveInterval(minutes * 60);
+		}
+		
 		//create classloader
 		ClassLoader cl = createClassLoader(application);
 
