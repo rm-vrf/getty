@@ -1,8 +1,5 @@
 package cn.batchfile.getty.manager;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
@@ -12,13 +9,12 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
 import cn.batchfile.getty.application.Application;
 import cn.batchfile.getty.application.ApplicationInstance;
-import groovy.util.GroovyScriptEngine;
 
 public class WebSocketManager extends WebSocketServlet {
 
 	private static final Logger LOG = Logger.getLogger(WebSocketManager.class);
 	private static final long serialVersionUID = 6471275025352138121L;
-	private Map<String, GroovyScriptEngine> gses = new ConcurrentHashMap<String, GroovyScriptEngine>();
+	private ScriptEngineManager scriptEngineManager;
 	private Application application;
 	private ApplicationInstance applicationInstance;
 	private ClassLoader classLoader;
@@ -47,6 +43,14 @@ public class WebSocketManager extends WebSocketServlet {
 		this.classLoader = classLoader;
 	}
 
+	public ScriptEngineManager getScriptEngineManager() {
+		return scriptEngineManager;
+	}
+
+	public void setScriptEngineManager(ScriptEngineManager scriptEngineManager) {
+		this.scriptEngineManager = scriptEngineManager;
+	}
+
 	@Override
 	public void configure(WebSocketServletFactory factory) {
 		factory.setCreator(new WebSocketCreator() {
@@ -54,7 +58,7 @@ public class WebSocketManager extends WebSocketServlet {
 			public Object createWebSocket(ServletUpgradeRequest request, ServletUpgradeResponse response) {
 				LOG.debug("create websocket servlet");
 				WebSocketInstance wsi = new WebSocketInstance();
-				wsi.setGses(gses);
+				wsi.setScriptEngineManager(scriptEngineManager);
 				wsi.setApplication(application);
 				wsi.setApplicationInstance(applicationInstance);
 				wsi.setClassLoader(classLoader);

@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -33,10 +32,6 @@ import cn.batchfile.getty.binding.http.Request;
 import cn.batchfile.getty.binding.http.Response;
 import cn.batchfile.getty.binding.http.Session;
 import cn.batchfile.getty.util.MimeTypes;
-import groovy.lang.Binding;
-import groovy.util.GroovyScriptEngine;
-import groovy.util.ResourceException;
-import groovy.util.ScriptException;
 
 public class ServletManager implements Servlet {
 	
@@ -55,7 +50,7 @@ public class ServletManager implements Servlet {
 	private ApplicationInstance applicationInstance;
 	private MimeTypes mimeTypes = new MimeTypes();
 	private ClassLoader classLoader;
-	private Map<String, GroovyScriptEngine> gses = new ConcurrentHashMap<String, GroovyScriptEngine>();
+	private ScriptEngineManager scriptEngineManager;
 
 	public MappingManager getMappingManager() {
 		return mappingManager;
@@ -89,6 +84,14 @@ public class ServletManager implements Servlet {
 		this.classLoader = classLoader;
 	}
 	
+	public ScriptEngineManager getScriptEngineManager() {
+		return scriptEngineManager;
+	}
+
+	public void setScriptEngineManager(ScriptEngineManager scriptEngineManager) {
+		this.scriptEngineManager = scriptEngineManager;
+	}
+
 	@Override
 	public void destroy() {
 		// pass
@@ -271,66 +274,42 @@ public class ServletManager implements Servlet {
 		Logger bindingLogger = Logger.getLogger(file.getName());
 		
 		//binding inner object
-		Binding binding = new Binding();
-		binding.setProperty("$application", applicationInstance);
-		binding.setProperty("$app", applicationInstance);
-		binding.setProperty("$request", bindingRequest);
-		binding.setProperty("$req", bindingRequest);
-		binding.setProperty("$response", bindingResponse);
-		binding.setProperty("$res", bindingResponse);
-		binding.setProperty("$resp", bindingResponse);
-		binding.setProperty("$session", bindingSession);
-		binding.setProperty("$cookie", bindingCookie);
-		binding.setProperty("$logger", bindingLogger);
-		binding.setProperty("$log", bindingLogger);
-		binding.setProperty("$vars", vars);
+		Map<String, Object> binding = new HashMap<String, Object>();
+		binding.put("$application", applicationInstance);
+		binding.put("$app", applicationInstance);
+		binding.put("$request", bindingRequest);
+		binding.put("$req", bindingRequest);
+		binding.put("$response", bindingResponse);
+		binding.put("$res", bindingResponse);
+		binding.put("$resp", bindingResponse);
+		binding.put("$session", bindingSession);
+		binding.put("$cookie", bindingCookie);
+		binding.put("$logger", bindingLogger);
+		binding.put("$log", bindingLogger);
+		binding.put("$vars", vars);
 
 		//binding path vars
 		for (Entry<String, Object> entry : vars.entrySet()) {
-			binding.setVariable(entry.getKey(), entry.getValue());
+			binding.put(entry.getKey(), entry.getValue());
 		}
 
 		//binding input param
 		for (Entry<String, Object> entry : bindingRequest.getParameters().entrySet()) {
-			binding.setVariable(entry.getKey(), entry.getValue());
+			binding.put(entry.getKey(), entry.getValue());
 		}
 
 		//set response charset
 		response.setCharacterEncoding(application.getCharsetEncoding());
 		
 		//execute script file
-		try {
-			GroovyScriptEngine gse = getGroovyScriptEngine(application);
-			Object r = gse.run(file.getAbsolutePath(), binding);
-			if (logger.isDebugEnabled()) {
-				logger.debug("shell return value: " + r);
-			}
-		} catch (IOException e) {
-			throw new RuntimeException("script exception: " + file.getName(), e);
-		} catch (ResourceException e) {
-			throw new RuntimeException("script exception: " + file.getName(), e);
-		} catch (ScriptException e) {
-			throw new RuntimeException("script exception: " + file.getName(), e);
+		Object r = scriptEngineManager.run(file.getAbsolutePath(), binding);
+		if (logger.isDebugEnabled()) {
+			logger.debug("shell return value: " + r);
 		}
-		
-		//process content-type
+
 		if (StringUtils.isEmpty(response.getContentType())) {
 			response.setContentType("text/html");
 		}
 	}
 	
-	private GroovyScriptEngine getGroovyScriptEngine(Application application) throws IOException {
-		String key = application.getDir().getAbsolutePath();
-		if (!gses.containsKey(key)) {
-			synchronized (gses) {
-				if (!gses.containsKey(key)) {
-					String path = application.getDir().getAbsolutePath();
-					GroovyScriptEngine gse = new GroovyScriptEngine(path, classLoader);
-					gses.put(key, gse);
-				}
-			}
-		}
-		return gses.get(key);
-	}
-
 }

@@ -45,27 +45,34 @@ public class ApplicationInstanceManager {
 		context.getSecurityHandler().setLoginService(loginService);
 		server.setHandler(context);
 		
-		//set session timeout
-		int minutes = application.getSession() == null ? 0 : application.getSession().getTimeout();
-		if (minutes > 0) {
-			context.getSessionHandler().getSessionManager().setMaxInactiveInterval(minutes * 60);
-		}
-		
 		//create classloader
 		ClassLoader cl = createClassLoader(application);
+		
+		//create script manager
+		ScriptEngineManager sem = createScriptEngineManager(application, cl);
 
 		//create servlet
-		ServletManager servletManager = createServletManager(application, ai, cl);
+		ServletManager servletManager = createServletManager(application, ai, cl, sem);
 		
 		//apply servlet
 		context.addServlet(new ServletHolder(servletManager), "/");
 		
 		//apply websocket
 		if (application.getWebSocket() != null) {
-			WebSocketManager socketManager = createWebSocketManager(application, ai, cl);
+			WebSocketManager socketManager = createWebSocketManager(application, ai, cl, sem);
 			context.addServlet(new ServletHolder(socketManager), application.getWebSocket().getUrlPattern());
 		}
 
+		//set session listener
+		SessionEventListener sessionEventListener = createSessionEventListener(application, ai, sem);
+		context.addEventListener(sessionEventListener);
+		
+		//set session timeout
+		int minutes = application.getSession() == null ? 0 : application.getSession().getTimeout();
+		if (minutes > 0) {
+			context.getSessionHandler().getSessionManager().setMaxInactiveInterval(minutes * 60);
+		}
+		
 		try {
 			server.start();
 			int port = ((ServerConnector)server.getConnectors()[0]).getLocalPort();
@@ -79,6 +86,24 @@ public class ApplicationInstanceManager {
 		return ai;
 	}
 	
+	private SessionEventListener createSessionEventListener(Application application, ApplicationInstance applicationInstance, ScriptEngineManager scriptEngineManager) {
+		SessionEventListener listener = new SessionEventListener();
+		listener.setApplication(application);
+		listener.setApplicationInstance(applicationInstance);
+		listener.setScriptEngineManager(scriptEngineManager);
+		if (application.getSession() != null) {
+			listener.setSessionListeners(application.getSession().getListeners());
+		}
+		return listener;
+	}
+
+	private ScriptEngineManager createScriptEngineManager(Application application, ClassLoader classLoader) {
+		ScriptEngineManager sem = new ScriptEngineManager();
+		sem.setApplication(application);
+		sem.setClassLoader(classLoader);
+		return sem;
+	}
+
 	private ClassLoader createClassLoader(Application application) throws MalformedURLException {
 		//构建classpath
 		List<File> classpath = new ArrayList<File>();
@@ -99,15 +124,16 @@ public class ApplicationInstanceManager {
 		return cl;
 	}
 	
-	private WebSocketManager createWebSocketManager(Application application, ApplicationInstance instance, ClassLoader classLoader) {
+	private WebSocketManager createWebSocketManager(Application application, ApplicationInstance instance, ClassLoader classLoader, ScriptEngineManager scriptEngineManager) {
 		WebSocketManager wsm = new WebSocketManager();
 		wsm.setApplication(application);
 		wsm.setApplicationInstance(instance);
 		wsm.setClassLoader(classLoader);
+		wsm.setScriptEngineManager(scriptEngineManager);
 		return wsm;
 	}
 
-	private ServletManager createServletManager(Application application, ApplicationInstance instance, ClassLoader classLoader) {
+	private ServletManager createServletManager(Application application, ApplicationInstance instance, ClassLoader classLoader, ScriptEngineManager scriptEngineManager) {
 		MappingManager mapping = new MappingManager();
 		mapping.setApplication(application);
 		
@@ -116,6 +142,7 @@ public class ApplicationInstanceManager {
 		servlet.setApplicationInstance(instance);
 		servlet.setMappingManager(mapping);
 		servlet.setClassLoader(classLoader);
+		servlet.setScriptEngineManager(scriptEngineManager);
 		
 		return servlet;
 	}

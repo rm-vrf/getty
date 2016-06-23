@@ -1,6 +1,7 @@
 package cn.batchfile.getty.manager;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -19,29 +20,17 @@ import cn.batchfile.getty.application.WebSocketHandler;
 import cn.batchfile.getty.binding.socket.Cookie;
 import cn.batchfile.getty.binding.socket.Request;
 import cn.batchfile.getty.binding.socket.Response;
-import groovy.lang.Binding;
-import groovy.util.GroovyScriptEngine;
-import groovy.util.ResourceException;
-import groovy.util.ScriptException;
 
 @WebSocket
 public class WebSocketInstance {
 
 	private static final Logger LOG = Logger.getLogger(WebSocketInstance.class);
-	private Map<String, GroovyScriptEngine> gses;
+	private ScriptEngineManager scriptEngineManager;
 	private Application application;
 	private ApplicationInstance applicationInstance;
 	private ClassLoader classLoader;
 	private Session session;
 	private cn.batchfile.getty.binding.socket.Session bindingSession;
-
-	public Map<String, GroovyScriptEngine> getGses() {
-		return gses;
-	}
-
-	public void setGses(Map<String, GroovyScriptEngine> gses) {
-		this.gses = gses;
-	}
 
 	public Application getApplication() {
 		return application;
@@ -67,6 +56,14 @@ public class WebSocketInstance {
 		this.classLoader = classLoader;
 	}
 	
+	public ScriptEngineManager getScriptEngineManager() {
+		return scriptEngineManager;
+	}
+
+	public void setScriptEngineManager(ScriptEngineManager scriptEngineManager) {
+		this.scriptEngineManager = scriptEngineManager;
+	}
+
 	@OnWebSocketConnect
     public void handleConnect(Session session) {
 		String uri = session.getUpgradeRequest().getRequestURI().getPath();
@@ -169,67 +166,44 @@ public class WebSocketInstance {
 		Logger bindingLogger = Logger.getLogger(file);
 		
 		//binding inner object
-		Binding binding = new Binding();
-		binding.setProperty("$application", applicationInstance);
-		binding.setProperty("$app", applicationInstance);
-		binding.setProperty("$request", bindingRequest);
-		binding.setProperty("$req", bindingRequest);
-		binding.setProperty("$response", bindingResponse);
-		binding.setProperty("$res", bindingResponse);
-		binding.setProperty("$resp", bindingResponse);
-		binding.setProperty("$session", bindingSession);
-		binding.setProperty("$cookie", bindingCookie);
-		binding.setProperty("$logger", bindingLogger);
-		binding.setProperty("$log", bindingLogger);
+		Map<String, Object> binding = new HashMap<String, Object>();
+		binding.put("$application", applicationInstance);
+		binding.put("$app", applicationInstance);
+		binding.put("$request", bindingRequest);
+		binding.put("$req", bindingRequest);
+		binding.put("$response", bindingResponse);
+		binding.put("$res", bindingResponse);
+		binding.put("$resp", bindingResponse);
+		binding.put("$session", bindingSession);
+		binding.put("$cookie", bindingCookie);
+		binding.put("$logger", bindingLogger);
+		binding.put("$log", bindingLogger);
 		if (t != null) {
-			binding.setProperty("$error", t);
-			binding.setProperty("$e", t);
+			binding.put("$error", t);
+			binding.put("$e", t);
 		}
 		if (message != null) {
-			binding.setProperty("$message", message);
+			binding.put("$message", message);
 		}
 		
 		//binding input param
 		for (Entry<String, Object> entry : bindingRequest.getParameters().entrySet()) {
-			binding.setVariable(entry.getKey(), entry.getValue());
+			binding.put(entry.getKey(), entry.getValue());
 		}
 		
 		//set response charset
 		bindingResponse.setCharset(application.getCharsetEncoding());
 		
 		//execute script file
-		try {
-			GroovyScriptEngine gse = getGroovyScriptEngine(application);
-			Object r = gse.run(file, binding);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("shell return value: " + r);
-			}
-		} catch (IOException e) {
-			throw new RuntimeException("script exception: " + file, e);
-		} catch (ResourceException e) {
-			throw new RuntimeException("script exception: " + file, e);
-		} catch (ScriptException e) {
-			throw new RuntimeException("script exception: " + file, e);
+		Object r = scriptEngineManager.run(file, binding);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("shell return value: " + r);
 		}
 		
 		//process content-type
 		if (StringUtils.isEmpty(bindingResponse.getContentType())) {
 			bindingResponse.setContentType("text/html");
 		}
-	}
-
-	private GroovyScriptEngine getGroovyScriptEngine(Application application) throws IOException {
-		String key = application.getDir().getAbsolutePath();
-		if (!gses.containsKey(key)) {
-			synchronized (gses) {
-				if (!gses.containsKey(key)) {
-					String path = application.getDir().getAbsolutePath();
-					GroovyScriptEngine gse = new GroovyScriptEngine(path, classLoader);
-					gses.put(key, gse);
-				}
-			}
-		}
-		return gses.get(key);
 	}
 	
 	private WebSocketHandler getHandler(String uri) {
