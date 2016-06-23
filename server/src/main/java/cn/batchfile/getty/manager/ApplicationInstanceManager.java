@@ -5,14 +5,18 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.DispatcherType;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
@@ -73,6 +77,15 @@ public class ApplicationInstanceManager {
 			context.getSessionHandler().getSessionManager().setMaxInactiveInterval(minutes * 60);
 		}
 		
+		//setup filtes
+		//ServletFilterManager servletFilterManager = createServletFilterManager();
+		ServletFilterManager filterManager = new ServletFilterManager();
+		filterManager.setApplication(application);
+		filterManager.setApplicationInstance(ai);
+		filterManager.setScriptEngineManager(sem);
+		EnumSet<DispatcherType> dts = EnumSet.of(DispatcherType.REQUEST);
+		context.addFilter(new FilterHolder(filterManager), "*", dts);
+		
 		//create applicaiton listener
 		ApplicationEventListener ael = createApplicationEventListener(server, application, ai, sem);
 		applicationEventListeners.put(application.getName(), ael);
@@ -111,8 +124,10 @@ public class ApplicationInstanceManager {
 			}
 		}
 	}
-
-	private ApplicationEventListener createApplicationEventListener(Server server, Application application, ApplicationInstance applicationInstance, ScriptEngineManager scriptEngineManager) {
+	
+	private ApplicationEventListener createApplicationEventListener(Server server, Application application, 
+			ApplicationInstance applicationInstance, ScriptEngineManager scriptEngineManager) {
+		
 		ApplicationEventListener ael = new ApplicationEventListener();
 		ael.setServer(server);
 		ael.setApplication(application);
@@ -121,7 +136,8 @@ public class ApplicationInstanceManager {
 		return ael;
 	}
 	
-	private SessionEventListener createSessionEventListener(Application application, ApplicationInstance applicationInstance, ScriptEngineManager scriptEngineManager) {
+	private SessionEventListener createSessionEventListener(Application application, ApplicationInstance applicationInstance, 
+			ScriptEngineManager scriptEngineManager) {
 		SessionEventListener listener = new SessionEventListener();
 		listener.setApplication(application);
 		listener.setApplicationInstance(applicationInstance);
@@ -156,7 +172,9 @@ public class ApplicationInstanceManager {
 		return cl;
 	}
 	
-	private WebSocketManager createWebSocketManager(Application application, ApplicationInstance instance, ClassLoader classLoader, ScriptEngineManager scriptEngineManager) {
+	private WebSocketManager createWebSocketManager(Application application, ApplicationInstance instance, 
+			ClassLoader classLoader, ScriptEngineManager scriptEngineManager) {
+		
 		WebSocketManager wsm = new WebSocketManager();
 		wsm.setApplication(application);
 		wsm.setApplicationInstance(instance);
@@ -165,7 +183,9 @@ public class ApplicationInstanceManager {
 		return wsm;
 	}
 
-	private ServletManager createServletManager(Application application, ApplicationInstance instance, ClassLoader classLoader, ScriptEngineManager scriptEngineManager) {
+	private ServletManager createServletManager(Application application, ApplicationInstance instance, 
+			ClassLoader classLoader, ScriptEngineManager scriptEngineManager) {
+		
 		MappingManager mapping = new MappingManager();
 		mapping.setApplication(application);
 		
