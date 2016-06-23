@@ -2,11 +2,18 @@ package cn.batchfile.getty.binding.http;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 public class Session {
 
+	private HttpSession httpSession;
 	private HttpServletRequest request;
 	private SessionAttributeMap attributes;
+	
+	public Session(HttpSession httpSession) {
+		this.httpSession = httpSession;
+		attributes = new SessionAttributeMap(httpSession);
+	}
 
 	public Session(HttpServletRequest request) {
 		this.request = request;
@@ -14,28 +21,46 @@ public class Session {
 	}
 	
 	public long getCreationTime() {
-		return request.getSession(true).getCreationTime();
+		if (httpSession == null) {
+			httpSession = request.getSession(true);
+		}
+		return httpSession.getCreationTime();
 	}
 	
 	public String getId() {
-		return request.getSession(true).getId();
+		if (httpSession == null) {
+			httpSession = request.getSession(true);
+		}
+		return httpSession.getId();
 	}
 	
 	public long getLastAccessedTime() {
-		return request.getSession(true).getLastAccessedTime();
+		if (httpSession == null) {
+			httpSession = request.getSession(true);
+		}
+		return httpSession.getLastAccessedTime();
 	}
 	
 	public int getMaxInactiveInterval() {
-		return request.getSession(true).getMaxInactiveInterval();
+		if (httpSession == null) {
+			httpSession = request.getSession(true);
+		}
+		return httpSession.getMaxInactiveInterval();
 	}
 	
 	public Session setMaxInactiveInterval(int maxInactiveInterval) {
-		request.getSession(true).setMaxInactiveInterval(maxInactiveInterval);
+		if (httpSession == null) {
+			httpSession = request.getSession(true);
+		}
+		httpSession.setMaxInactiveInterval(maxInactiveInterval);
 		return this;
 	}
 	
 	public ServletContext getServletContext() {
-		return request.getSession(true).getServletContext();
+		if (httpSession == null) {
+			httpSession = request.getSession(true);
+		}
+		return httpSession.getServletContext();
 	}
 	
 	public SessionAttributeMap getAttributes() {

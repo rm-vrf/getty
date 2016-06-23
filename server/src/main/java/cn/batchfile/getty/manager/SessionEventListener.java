@@ -1,15 +1,20 @@
 package cn.batchfile.getty.manager;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import cn.batchfile.getty.application.Application;
 import cn.batchfile.getty.application.ApplicationInstance;
 import cn.batchfile.getty.application.SessionListener;
+import cn.batchfile.getty.binding.http.Session;
 
 public class SessionEventListener implements HttpSessionListener {
 
@@ -53,18 +58,43 @@ public class SessionEventListener implements HttpSessionListener {
 
 	@Override
 	public void sessionCreated(HttpSessionEvent event) {
-		LOG.debug("create session, id: " + event.getSession().getId());
-		
-		// TODO Auto-generated method stub
-		
+		execute(event.getSession(), true);
 	}
 
 	@Override
 	public void sessionDestroyed(HttpSessionEvent event) {
-		LOG.debug("destroy session, id: " + event.getSession().getId());
-		
-		// TODO Auto-generated method stub
-		
+		execute(event.getSession(), false);
 	}
 
+	private void execute(HttpSession session, boolean created) {
+		//创建会话对象
+		Session bindingSession = new Session(session);
+		
+		//创建脚本变量
+		Map<String, Object> binding = new HashMap<String, Object>();
+		binding.put("$application", applicationInstance);
+		binding.put("$app", applicationInstance);
+		binding.put("$session", bindingSession);
+		
+		//如果设置了监听器，执行每一个创建脚本
+		if (sessionListeners != null) {
+			for (SessionListener listener : sessionListeners) {
+
+				//判断脚本的类型
+				String file = created ? listener.getCreated() : listener.getDestroyed();
+				//如果设置了脚本名称，执行它
+				if (StringUtils.isNotBlank(file)) {
+					try {
+						Logger bindingLogger = Logger.getLogger(file);
+						binding.put("$logger", bindingLogger);
+						binding.put("$log", bindingLogger);
+						scriptEngineManager.run(listener.getCreated(), binding);
+					} catch (Exception e) {
+						LOG.error("error when excute session listener: " + file, e);
+					}
+				}
+			}
+		}
+	}
+	
 }

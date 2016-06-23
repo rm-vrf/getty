@@ -11,19 +11,27 @@ import javax.servlet.http.HttpSession;
 
 public class SessionAttributeMap implements Map<String, Object>{
 
+	private HttpSession httpSession;
 	private HttpServletRequest request;
+	
+	public SessionAttributeMap(HttpSession httpSession) {
+		this.httpSession = httpSession;
+	}
 	
 	public SessionAttributeMap(HttpServletRequest request) {
 		this.request = request;
 	}
 
 	private Map<String, Object> map() {
-		HttpSession session = request.getSession(true);
+		if (httpSession == null) {
+			httpSession = request.getSession(true);
+		}
+		
 		Map<String, Object> map = new HashMap<String, Object>();
-		Enumeration<String> names = session.getAttributeNames();
+		Enumeration<String> names = httpSession.getAttributeNames();
 		while (names.hasMoreElements()) {
 			String name = names.nextElement();
-			Object value = session.getAttribute(name);
+			Object value = httpSession.getAttribute(name);
 			map.put(name, value);
 		}
 		return map;
@@ -51,19 +59,28 @@ public class SessionAttributeMap implements Map<String, Object>{
 
 	@Override
 	public Object get(Object key) {
-		return request.getSession(true).getAttribute(key.toString());
+		if (httpSession == null) {
+			httpSession = request.getSession(true);
+		}
+		return httpSession.getAttribute(key.toString());
 	}
 
 	@Override
 	public Object put(String key, Object value) {
-		request.getSession(true).setAttribute(key, value);
+		if (httpSession == null) {
+			httpSession = request.getSession(true);
+		}
+		httpSession.setAttribute(key, value);
 		return value;
 	}
 
 	@Override
 	public Object remove(Object key) {
-		Object r = request.getSession(true).getAttribute(key.toString());
-		request.getSession(true).removeAttribute(key.toString());
+		if (httpSession == null) {
+			httpSession = request.getSession(true);
+		}
+		Object r = httpSession.getAttribute(key.toString());
+		httpSession.removeAttribute(key.toString());
 		return r;
 	}
 
@@ -76,11 +93,13 @@ public class SessionAttributeMap implements Map<String, Object>{
 
 	@Override
 	public void clear() {
-		HttpSession session = request.getSession(true);
-		Enumeration<String> names = session.getAttributeNames();
+		if (httpSession == null) {
+			httpSession = request.getSession(true);
+		}
+		Enumeration<String> names = httpSession.getAttributeNames();
 		while (names.hasMoreElements()) {
 			String name = names.nextElement();
-			session.removeAttribute(name);
+			httpSession.removeAttribute(name);
 		}
 	}
 
