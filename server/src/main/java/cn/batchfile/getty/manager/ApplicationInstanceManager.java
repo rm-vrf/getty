@@ -24,8 +24,8 @@ import cn.batchfile.getty.lang.ApplicationClassLoader;
 
 public class ApplicationInstanceManager {
 	
-	private static final Logger logger = Logger.getLogger(ApplicationInstanceManager.class);
-	private Map<String, Server> servers = new HashMap<String, Server>();
+	private static final Logger LOG = Logger.getLogger(ApplicationInstanceManager.class);
+	private Map<String, ApplicationEventListener> applicationEventListeners = new HashMap<String, ApplicationEventListener>();
 
 	public ApplicationInstance start(Application application) throws MalformedURLException {
 		ApplicationInstance ai = new ApplicationInstance();
@@ -73,12 +73,20 @@ public class ApplicationInstanceManager {
 			context.getSessionHandler().getSessionManager().setMaxInactiveInterval(minutes * 60);
 		}
 		
+		//create applicaiton listener
+		ApplicationEventListener ael = createApplicationEventListener(server, application, ai, sem);
+		applicationEventListeners.put(application.getName(), ael);
+		
 		try {
+			//启动web服务
 			server.start();
 			int port = ((ServerConnector)server.getConnectors()[0]).getLocalPort();
 			
-			logger.info(String.format("start application %s at port: %s", application.getName(), port));
+			LOG.info(String.format("start %s at port: %s", application.getName(), port));
 			ai.setPort(port);
+			
+			//执行应用监听器
+			ael.applicationStart();
 		} catch (Exception e) {
 			throw new RuntimeException("error when start web server", e);
 		}
@@ -86,14 +94,38 @@ public class ApplicationInstanceManager {
 		return ai;
 	}
 	
+	public void stop(String name) {
+		ApplicationEventListener listener = applicationEventListeners.get(name);
+		if (listener != null) {
+			
+			//stop web server
+			try {
+				listener.getServer().stop();
+			} catch (Exception e) {
+			}
+			
+			//execute application listener
+			try {
+				listener.applicationStop();
+			} catch (Exception e) {
+			}
+		}
+	}
+
+	private ApplicationEventListener createApplicationEventListener(Server server, Application application, ApplicationInstance applicationInstance, ScriptEngineManager scriptEngineManager) {
+		ApplicationEventListener ael = new ApplicationEventListener();
+		ael.setServer(server);
+		ael.setApplication(application);
+		ael.setApplicationInstance(applicationInstance);
+		ael.setScriptEngineManager(scriptEngineManager);
+		return ael;
+	}
+	
 	private SessionEventListener createSessionEventListener(Application application, ApplicationInstance applicationInstance, ScriptEngineManager scriptEngineManager) {
 		SessionEventListener listener = new SessionEventListener();
 		listener.setApplication(application);
 		listener.setApplicationInstance(applicationInstance);
 		listener.setScriptEngineManager(scriptEngineManager);
-		if (application.getSession() != null) {
-			listener.setSessionListeners(application.getSession().getListeners());
-		}
 		return listener;
 	}
 
@@ -145,16 +177,6 @@ public class ApplicationInstanceManager {
 		servlet.setScriptEngineManager(scriptEngineManager);
 		
 		return servlet;
-	}
-
-	public void stop(String name) {
-		try {
-			servers.get(name).stop();
-		} catch (Exception e) {
-			//pass
-		} finally {
-			servers.remove(name);
-		}
 	}
 
 	private void setRuntimeParameters(Server server) {

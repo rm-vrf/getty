@@ -3,25 +3,30 @@ package cn.batchfile.getty.manager;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.Server;
 
 import cn.batchfile.getty.application.Application;
 import cn.batchfile.getty.application.ApplicationInstance;
-import cn.batchfile.getty.application.SessionListener;
-import cn.batchfile.getty.binding.http.Session;
+import cn.batchfile.getty.application.ApplicationListener;
 
-public class SessionEventListener implements HttpSessionListener {
+public class ApplicationEventListener {
 
-	private static final Logger LOG = Logger.getLogger(SessionEventListener.class);
+	private static final Logger LOG = Logger.getLogger(ApplicationEventListener.class);
+	private Server server;
 	private Application application;
 	private ApplicationInstance applicationInstance;
 	private ScriptEngineManager scriptEngineManager;
 	
+	public Server getServer() {
+		return server;
+	}
+
+	public void setServer(Server server) {
+		this.server = server;
+	}
+
 	public Application getApplication() {
 		return application;
 	}
@@ -45,33 +50,27 @@ public class SessionEventListener implements HttpSessionListener {
 	public void setScriptEngineManager(ScriptEngineManager scriptEngineManager) {
 		this.scriptEngineManager = scriptEngineManager;
 	}
-
-	@Override
-	public void sessionCreated(HttpSessionEvent event) {
-		execute(event.getSession(), true);
+	
+	public void applicationStart() {
+		execute(true);	
 	}
-
-	@Override
-	public void sessionDestroyed(HttpSessionEvent event) {
-		execute(event.getSession(), false);
+	
+	public void applicationStop() {
+		execute(false);
 	}
-
-	private void execute(HttpSession session, boolean created) {
-		//创建会话对象
-		Session bindingSession = new Session(session);
-		
+	
+	private void execute(boolean start) {
 		//创建脚本变量
 		Map<String, Object> binding = new HashMap<String, Object>();
 		binding.put("$application", applicationInstance);
 		binding.put("$app", applicationInstance);
-		binding.put("$session", bindingSession);
-		
-		//如果设置了监听器，执行每一个创建脚本
-		if (application.getSession() != null && application.getSession().getListeners() != null) {
-			for (SessionListener listener : application.getSession().getListeners()) {
 
+		//如果设置了监听器，执行每一个创建脚本
+		if (application.getListeners() != null) {
+			for (ApplicationListener listener : application.getListeners()) {
+				
 				//判断脚本的类型
-				String file = created ? listener.getCreated() : listener.getDestroyed();
+				String file = start ? listener.getStart() : listener.getStop();
 				
 				//如果设置了脚本名称，执行它
 				if (StringUtils.isNotBlank(file)) {
@@ -81,11 +80,10 @@ public class SessionEventListener implements HttpSessionListener {
 						binding.put("$log", bindingLogger);
 						scriptEngineManager.run(file, binding);
 					} catch (Exception e) {
-						LOG.error("error when execute session listener: " + file, e);
+						LOG.error("error when execute application listener: " + file, e);
 					}
 				}
 			}
 		}
 	}
-	
 }

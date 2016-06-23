@@ -1,1 +1,1 @@
-$logger.info("start demo");
+$logger.info("start demo, port: " + $app.port);
