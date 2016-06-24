@@ -1,16 +1,17 @@
 package cn.batchfile.getty.server;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
@@ -24,6 +25,7 @@ import cn.batchfile.getty.application.Application;
 import cn.batchfile.getty.manager.ApplicationInstanceManager;
 import cn.batchfile.getty.manager.ApplicationManager;
 import cn.batchfile.getty.util.ParseCommandUtil;
+import cn.batchfile.getty.util.PlaceholderUtils;
 
 public class Main {
 	private static final Logger LOG = Logger.getLogger(Main.class);
@@ -45,7 +47,7 @@ public class Main {
 		}
 		
 		//加载日志
-		main.configLog(baseDir, "../conf/log4j.properties");
+		main.configLog(baseDir, "conf/log.properties");
 		LOG.info("-----start getty-----");
 		
 		//寻找应用目录
@@ -77,8 +79,12 @@ public class Main {
 	}
 	
 	private void configLog(String base, String config) throws Exception {
+		final Map<String, String> vars = new HashMap<String, String>();
+		vars.put("base.dir", base);
+		vars.put("baseDir", base);
+		
 		final File propertiesFile = new File(base, config);
-		configLog(propertiesFile);
+		configLog(propertiesFile, vars);
 
 		//创建log文件监听器
 		FileAlterationObserver observer = new FileAlterationObserver(propertiesFile.getParent(), new NameFileFilter(propertiesFile.getName()), null);
@@ -100,13 +106,13 @@ public class Main {
 			@Override
 			public void onFileCreate(File file) {
 				LOG.info(propertiesFile.getName() +  " created");
-				configLog(file);
+				configLog(file, vars);
 			}
 			
 			@Override
 			public void onFileChange(File file) {
 				LOG.info(propertiesFile.getName() +  " changed");
-				configLog(file);
+				configLog(file, vars);
 			}
 			
 			@Override
@@ -128,21 +134,24 @@ public class Main {
 		monitor.start();
 	}
 	
-	protected void configLog(File file) {
+	private void configLog(File file, Map<String, String> vars) {
 		if (file.exists()) {
-			//TODO replace wildcard
-			InputStream stream = null;
+			LOG.info("load log.properties from " + file.getAbsolutePath());
 			try {
-				stream = new FileInputStream(file);
+				String content = FileUtils.readFileToString(file);
+				content = PlaceholderUtils.resolvePlaceholders(content, vars);
+				LOG.info(content);
+				
+				InputStream stream = new ByteArrayInputStream(content.getBytes());
 				Properties props = new Properties();
 				props.load(stream);
 				BasicConfigurator.resetConfiguration();
 				PropertyConfigurator.configure(props);
 			} catch (IOException e) {
-				throw new RuntimeException("error when load log4j config", e);
-			} finally {
-				IOUtils.closeQuietly(stream);
+				throw new RuntimeException("error when load log config", e);
 			}
+		} else {
+			LOG.info("cannot find log.properties in " + file.getAbsolutePath());
 		}
 	}
 

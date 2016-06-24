@@ -22,6 +22,20 @@
 			</includes>
 		</fileSet>
 		<fileSet>
+			<outputDirectory>conf</outputDirectory>
+			<directory>server/target/getty-${project.version}-GA/getty-${project.version}/conf</directory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<outputDirectory>logs</outputDirectory>
+			<directory>server/target/getty-${project.version}-GA/getty-${project.version}/logs</directory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
 			<outputDirectory>tmp</outputDirectory>
 			<directory>server/target/getty-${project.version}-GA/getty-${project.version}/tmp</directory>
 			<includes>

@@ -29,10 +29,24 @@
 			</includes>
 		</fileSet>
 		<fileSet>
+			<outputDirectory>conf</outputDirectory>
+			<directory>src/main/resources</directory>
+			<includes>
+				<include>log.properties</include>
+			</includes>
+		</fileSet>
+		<fileSet>
 			<outputDirectory>webapps</outputDirectory>
 			<directory>../</directory>
 			<includes>
 				<include>*.md</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<outputDirectory>logs</outputDirectory>
+			<directory>src/main/resources</directory>
+			<includes>
+				<include>index.html</include>
 			</includes>
 		</fileSet>
 		<fileSet>

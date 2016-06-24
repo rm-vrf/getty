@@ -21,6 +21,7 @@ FILE_ENCODING=UTF-8
 TMP_DIR=$PRGDIR/../tmp
 GT_PIDFILE=$TMP_DIR/getty.pid
 LIB_DIR=$PRGDIR/../lib
+BASE_DIR=$PRGDIR/..
 MAIN_CLASS=cn.batchfile.getty.server.Main
 APPS_DIR=$PRGDIR/../webapps
 
@@ -46,7 +47,7 @@ GT_START="$CMD $JAVA_OPTS -classpath $CP \
     -Djava.tmp.dir=$TMP_DIR \
     -Djava.io.tmpdir=$TMP_DIR \
     $MAIN_CLASS \
-    --base-dir=$PRGDIR \
+    --base-dir=$BASE_DIR \
     --apps-dir=$APPS_DIR \
     --pid-file=$GT_PIDFILE"
 #echo $GT_START
