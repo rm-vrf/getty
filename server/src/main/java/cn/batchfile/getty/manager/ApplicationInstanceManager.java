@@ -12,10 +12,12 @@ import java.util.Map;
 
 import javax.servlet.DispatcherType;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -24,6 +26,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 import cn.batchfile.getty.application.Application;
 import cn.batchfile.getty.application.ApplicationInstance;
+import cn.batchfile.getty.application.ErrorHandler;
 import cn.batchfile.getty.lang.ApplicationClassLoader;
 
 public class ApplicationInstanceManager {
@@ -55,13 +58,11 @@ public class ApplicationInstanceManager {
 		//create script manager
 		ScriptEngineManager sem = createScriptEngineManager(application, cl);
 
-		//create servlet
-		ServletManager servletManager = createServletManager(application, ai, cl, sem);
-		
 		//apply servlet
+		ServletManager servletManager = createServletManager(application, ai, cl, sem);
 		context.addServlet(new ServletHolder(servletManager), "/");
 		
-		//apply websocket
+		//apply websocket servlet
 		if (application.getWebSocket() != null) {
 			WebSocketManager socketManager = createWebSocketManager(application, ai, cl, sem);
 			context.addServlet(new ServletHolder(socketManager), application.getWebSocket().getUrlPattern());
@@ -77,18 +78,16 @@ public class ApplicationInstanceManager {
 			context.getSessionHandler().getSessionManager().setMaxInactiveInterval(minutes * 60);
 		}
 		
-		//setup filtes
-		//ServletFilterManager servletFilterManager = createServletFilterManager();
-		ServletFilterManager filterManager = new ServletFilterManager();
-		filterManager.setApplication(application);
-		filterManager.setApplicationInstance(ai);
-		filterManager.setScriptEngineManager(sem);
-		EnumSet<DispatcherType> dts = EnumSet.of(DispatcherType.REQUEST);
-		context.addFilter(new FilterHolder(filterManager), "*", dts);
-		
 		//create applicaiton listener
 		ApplicationEventListener ael = createApplicationEventListener(server, application, ai, sem);
 		applicationEventListeners.put(application.getName(), ael);
+		
+		//setup filtes
+		ServletFilterManager filterManager = createServletFilterManager(application, ai, sem);
+		context.addFilter(new FilterHolder(filterManager), "*", EnumSet.of(DispatcherType.REQUEST));
+
+		//setup error pages
+		setupErrorPages(context, application.getErrorHandlers());
 		
 		try {
 			//启动web服务
@@ -125,6 +124,36 @@ public class ApplicationInstanceManager {
 		}
 	}
 	
+	private void setupErrorPages(WebAppContext context, List<ErrorHandler> errorHandlers) {
+		if (errorHandlers != null) {
+			ErrorPageErrorHandler errorHandler = (ErrorPageErrorHandler)context.getErrorHandler();
+			for (ErrorHandler handler : errorHandlers) {
+				String page = handler.getFile();
+				if (!StringUtils.startsWith(page, "/")) {
+					page = "/" + page;
+				}
+				
+				if (handler.getErrorCode() > 0) {
+					errorHandler.addErrorPage(handler.getErrorCode(), page);
+				} else {
+					errorHandler.addErrorPage(Integer.MIN_VALUE, Integer.MAX_VALUE, page);
+				}
+			}
+		}
+	}
+
+	private ServletFilterManager createServletFilterManager(Application application, 
+			ApplicationInstance applicationInstance,
+			ScriptEngineManager scriptEngineManager) {
+		
+		ServletFilterManager filterManager = new ServletFilterManager();
+		filterManager.setApplication(application);
+		filterManager.setApplicationInstance(applicationInstance);
+		filterManager.setScriptEngineManager(scriptEngineManager);
+		
+		return filterManager;
+	}
+
 	private ApplicationEventListener createApplicationEventListener(Server server, Application application, 
 			ApplicationInstance applicationInstance, ScriptEngineManager scriptEngineManager) {
 		
