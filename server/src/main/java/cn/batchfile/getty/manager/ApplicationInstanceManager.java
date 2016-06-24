@@ -48,7 +48,7 @@ public class ApplicationInstanceManager {
 		context.setWar(application.getDir().getAbsolutePath());
 		context.setServer(server);
 		
-		HashLoginService loginService = new HashLoginService("GETTY-SECURITY-REALM");
+		HashLoginService loginService = new HashLoginService("GETTY-SECURITY-REALM-" + application.getName());
 		context.getSecurityHandler().setLoginService(loginService);
 		server.setHandler(context);
 		
@@ -89,6 +89,12 @@ public class ApplicationInstanceManager {
 		//setup error pages
 		setupErrorPages(context, application.getErrorHandlers());
 		
+		//setup crontab
+		CrontabManager crontabManager = new CrontabManager();
+		crontabManager.setApplication(application);
+		crontabManager.setApplicationInstance(ai);
+		crontabManager.setScriptEngineManager(sem);
+		
 		try {
 			//启动web服务
 			server.start();
@@ -99,8 +105,11 @@ public class ApplicationInstanceManager {
 			
 			//执行应用监听器
 			ael.applicationStart();
+			
+			//执行定时器
+			crontabManager.start();
 		} catch (Exception e) {
-			throw new RuntimeException("error when start web server", e);
+			throw new RuntimeException("error when start " + application.getName(), e);
 		}
 		
 		return ai;
@@ -110,17 +119,20 @@ public class ApplicationInstanceManager {
 		ApplicationEventListener listener = applicationEventListeners.get(name);
 		if (listener != null) {
 			
-			//stop web server
+			LOG.info("stop jetty for " + name);
 			try {
 				listener.getServer().stop();
 			} catch (Exception e) {
 			}
 			
-			//execute application listener
+			LOG.info("invoke application stop for " + name);
 			try {
 				listener.applicationStop();
 			} catch (Exception e) {
 			}
+			
+			LOG.info("stop crontab for " + name);
+			//TODO
 		}
 	}
 	

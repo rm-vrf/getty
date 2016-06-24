@@ -184,6 +184,12 @@ public class ApplicationManager {
 		
 		application.setCrontab(new Crontab());
 		application.getCrontab().setCrons(new ArrayList<Cron>());
+		
+		if (map.containsKey("concurrent")) {
+			boolean b = Boolean.valueOf(map.get("concurrent").toString());
+			application.getCrontab().setConcurrent(b);
+		}
+		
 		if (map.containsKey("cron")) {
 			list = (List<Map<String, Object>>)map.get("cron");
 			for (Map<String, Object> element : list) {
