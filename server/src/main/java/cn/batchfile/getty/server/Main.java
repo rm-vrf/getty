@@ -1,14 +1,24 @@
 package cn.batchfile.getty.server;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.NameFileFilter;
+import org.apache.commons.io.monitor.FileAlterationListener;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import cn.batchfile.getty.application.Application;
 import cn.batchfile.getty.manager.ApplicationInstanceManager;
@@ -16,21 +26,27 @@ import cn.batchfile.getty.manager.ApplicationManager;
 import cn.batchfile.getty.util.ParseCommandUtil;
 
 public class Main {
-	private static final Logger logger = Logger.getLogger(Main.class);
+	private static final Logger LOG = Logger.getLogger(Main.class);
 	
 	public static void main(String[] args) throws Exception {
-		logger.info("-----start getty-----");
-		Main main = new Main();
 		
 		//解析参数
 		String baseDir = ParseCommandUtil.getArgs(args, "base-dir", "b");
+		if (StringUtils.isEmpty(baseDir)) {
+			baseDir = ".";
+		}
 		String appsDir = ParseCommandUtil.getArgs(args, "apps-dir", "a");
 		String pidFile = ParseCommandUtil.getArgs(args, "pid-file", "p");
 
 		//写pid文件
+		Main main = new Main();
 		if (StringUtils.isNotEmpty(pidFile)) {
 			main.writePidFile(pidFile);
 		}
+		
+		//加载日志
+		main.configLog(baseDir, "../conf/log4j.properties");
+		LOG.info("-----start getty-----");
 		
 		//寻找应用目录
 		List<File> appDirs = main.findAppDirs(baseDir, appsDir);
@@ -51,7 +67,7 @@ public class Main {
 		//线程钩子
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
-				logger.info("stop getty");
+				LOG.info("stop getty");
 				for (Application application : applications) {
 					aim.stop(application.getName());
 					am.unload(application.getName());
@@ -60,6 +76,76 @@ public class Main {
 		});
 	}
 	
+	private void configLog(String base, String config) throws Exception {
+		final File propertiesFile = new File(base, config);
+		configLog(propertiesFile);
+
+		//创建log文件监听器
+		FileAlterationObserver observer = new FileAlterationObserver(propertiesFile.getParent(), new NameFileFilter(propertiesFile.getName()), null);
+		observer.addListener(new FileAlterationListener() {
+			
+			@Override
+			public void onStop(FileAlterationObserver observer) {
+			}
+			
+			@Override
+			public void onStart(FileAlterationObserver observer) {
+			}
+			
+			@Override
+			public void onFileDelete(File file) {
+				LOG.info(propertiesFile.getName() +  " deleted");
+			}
+			
+			@Override
+			public void onFileCreate(File file) {
+				LOG.info(propertiesFile.getName() +  " created");
+				configLog(file);
+			}
+			
+			@Override
+			public void onFileChange(File file) {
+				LOG.info(propertiesFile.getName() +  " changed");
+				configLog(file);
+			}
+			
+			@Override
+			public void onDirectoryDelete(File file) {
+				LOG.info("delete directory in log config dir");
+			}
+			
+			@Override
+			public void onDirectoryCreate(File file) {
+				LOG.info("create directory in log config dir");
+			}
+			
+			@Override
+			public void onDirectoryChange(File file) {
+				LOG.info("change directory in log config dir");
+			}
+		});
+		FileAlterationMonitor monitor = new FileAlterationMonitor(2000, observer);
+		monitor.start();
+	}
+	
+	protected void configLog(File file) {
+		if (file.exists()) {
+			//TODO replace wildcard
+			InputStream stream = null;
+			try {
+				stream = new FileInputStream(file);
+				Properties props = new Properties();
+				props.load(stream);
+				BasicConfigurator.resetConfiguration();
+				PropertyConfigurator.configure(props);
+			} catch (IOException e) {
+				throw new RuntimeException("error when load log4j config", e);
+			} finally {
+				IOUtils.closeQuietly(stream);
+			}
+		}
+	}
+
 	private List<File> findAppDirs(String baseDir, String appsDir) {
 		List<File> list = new ArrayList<File>();
 		File webapps = null;
@@ -73,7 +159,7 @@ public class Main {
 		
 		//找到webapps路径, 遍历子目录
 		if (webapps.exists()) {
-			logger.info("application root: " + webapps);
+			LOG.info("application root: " + webapps);
 			File[] dirs = webapps.listFiles();
 			for (File dir : dirs) {
 				//目录里面有项目文件，加载这个目录
@@ -91,7 +177,7 @@ public class Main {
 				if (app.exists() && app.isDirectory() 
 						&& new File(app, "app.yaml").exists()) {
 					list.add(app);
-					logger.info("application root: " + app);
+					LOG.info("application root: " + app);
 					break;
 				}
 			}
@@ -112,7 +198,7 @@ public class Main {
 				file.createNewFile();
 			}
 			FileUtils.writeStringToFile(file, pid);
-			logger.info(String.format("pid-file: %s, pid: %s", pidFile, pid));
+			LOG.info(String.format("pid file: %s, pid: %s", pidFile, pid));
 		}
 	}
 }
