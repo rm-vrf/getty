@@ -40,10 +40,10 @@ public class ServletManager implements Servlet {
 			"classes", 
 			"lib", 
 			"app.yaml", 
-			"cron.yaml", 
-			"log.yaml", 
 			"session.yaml", 
-			"websocket.yaml"};
+			"websocket.yaml",
+			"cron.yaml", 
+	};
 	
 	private MappingManager mappingManager;
 	private Application application;

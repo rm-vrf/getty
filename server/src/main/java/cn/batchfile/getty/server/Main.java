@@ -140,7 +140,6 @@ public class Main {
 			try {
 				String content = FileUtils.readFileToString(file);
 				content = PlaceholderUtils.resolvePlaceholders(content, vars);
-				LOG.info(content);
 				
 				InputStream stream = new ByteArrayInputStream(content.getBytes());
 				Properties props = new Properties();
