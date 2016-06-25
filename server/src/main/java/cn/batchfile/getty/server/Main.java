@@ -50,7 +50,13 @@ public class Main {
 		
 		//加载日志
 		main.configLog(baseDir, "conf/log.properties");
-		LOG.info("-----start getty-----");
+		LOG.info("  ____      _   _           ");
+		LOG.info(" / ___| ___| |_| |_ _   _   ");
+		LOG.info("| |  _ / _ \\ __| __| | | |  ");
+		LOG.info("| |_| |  __/ |_| |_| |_| |  ");
+		LOG.info(" \\____|\\___|\\__|\\__|\\__, |  ");
+		LOG.info("                    |___/   ");
+		LOG.info("Groovy on Jetty!            ");
 		
 		//寻找应用目录
 		List<File> appDirs = main.findAppDirs(baseDir, appsDir);
