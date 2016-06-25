@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.Server;
 
 import cn.batchfile.getty.application.Application;
 import cn.batchfile.getty.application.ApplicationInstance;
@@ -14,19 +13,10 @@ import cn.batchfile.getty.application.ApplicationListener;
 public class ApplicationEventListener {
 
 	private static final Logger LOG = Logger.getLogger(ApplicationEventListener.class);
-	private Server server;
 	private Application application;
 	private ApplicationInstance applicationInstance;
 	private ScriptEngineManager scriptEngineManager;
 	
-	public Server getServer() {
-		return server;
-	}
-
-	public void setServer(Server server) {
-		this.server = server;
-	}
-
 	public Application getApplication() {
 		return application;
 	}

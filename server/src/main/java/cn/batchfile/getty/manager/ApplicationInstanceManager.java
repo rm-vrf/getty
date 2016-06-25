@@ -32,7 +32,7 @@ import cn.batchfile.getty.lang.ApplicationClassLoader;
 public class ApplicationInstanceManager {
 	
 	private static final Logger LOG = Logger.getLogger(ApplicationInstanceManager.class);
-	private Map<String, ApplicationEventListener> applicationEventListeners = new HashMap<String, ApplicationEventListener>();
+	private Map<String, ApplicationHolder> applicationHolders = new HashMap<String, ApplicationHolder>();
 
 	public ApplicationInstance start(Application application) throws MalformedURLException {
 		ApplicationInstance ai = new ApplicationInstance();
@@ -79,8 +79,7 @@ public class ApplicationInstanceManager {
 		}
 		
 		//create applicaiton listener
-		ApplicationEventListener ael = createApplicationEventListener(server, application, ai, sem);
-		applicationEventListeners.put(application.getName(), ael);
+		ApplicationEventListener ael = createApplicationEventListener(application, ai, sem);
 		
 		//setup filtes
 		ServletFilterManager filterManager = createServletFilterManager(application, ai, sem);
@@ -90,10 +89,11 @@ public class ApplicationInstanceManager {
 		setupErrorPages(context, application.getErrorHandlers());
 		
 		//setup crontab
-		CrontabManager crontabManager = new CrontabManager();
-		crontabManager.setApplication(application);
-		crontabManager.setApplicationInstance(ai);
-		crontabManager.setScriptEngineManager(sem);
+		CrontabManager crontabManager = createCrontabManager(application, ai, sem);
+		
+		//setup applicatio holder
+		ApplicationHolder ah = createApplicationHolder(application, server, ael, crontabManager);
+		applicationHolders.put(application.getDir().getName(), ah);
 		
 		try {
 			//启动web服务
@@ -116,26 +116,48 @@ public class ApplicationInstanceManager {
 	}
 	
 	public void stop(String name) {
-		ApplicationEventListener listener = applicationEventListeners.get(name);
-		if (listener != null) {
+		ApplicationHolder holder = applicationHolders.get(name);
+		if (holder != null) {
 			
 			LOG.info("stop jetty for " + name);
 			try {
-				listener.getServer().stop();
+				holder.server.stop();
 			} catch (Exception e) {
 			}
 			
 			LOG.info("invoke application stop for " + name);
 			try {
-				listener.applicationStop();
+				holder.applicationEventListener.applicationStop();
 			} catch (Exception e) {
 			}
 			
 			LOG.info("stop crontab for " + name);
-			//TODO
+			try {
+				holder.crontabManager.stop();
+			} catch (Exception e) {
+			}
 		}
 	}
 	
+	private ApplicationHolder createApplicationHolder(Application application, Server server,
+			ApplicationEventListener ael, CrontabManager crontabManager) {
+		ApplicationHolder ah = new ApplicationHolder();
+		ah.server = server;
+		ah.applicationEventListener = ael;
+		ah.crontabManager = crontabManager;
+		ah.application = application;
+		return ah;
+	}
+
+	private CrontabManager createCrontabManager(Application application, ApplicationInstance ai,
+			ScriptEngineManager sem) {
+		CrontabManager crontabManager = new CrontabManager();
+		crontabManager.setApplication(application);
+		crontabManager.setApplicationInstance(ai);
+		crontabManager.setScriptEngineManager(sem);
+		return crontabManager;
+	}
+
 	private void setupErrorPages(WebAppContext context, List<ErrorHandler> errorHandlers) {
 		if (errorHandlers != null) {
 			ErrorPageErrorHandler errorHandler = (ErrorPageErrorHandler)context.getErrorHandler();
@@ -166,11 +188,10 @@ public class ApplicationInstanceManager {
 		return filterManager;
 	}
 
-	private ApplicationEventListener createApplicationEventListener(Server server, Application application, 
+	private ApplicationEventListener createApplicationEventListener(Application application, 
 			ApplicationInstance applicationInstance, ScriptEngineManager scriptEngineManager) {
 		
 		ApplicationEventListener ael = new ApplicationEventListener();
-		ael.setServer(server);
 		ael.setApplication(application);
 		ael.setApplicationInstance(applicationInstance);
 		ael.setScriptEngineManager(scriptEngineManager);
@@ -263,4 +284,10 @@ public class ApplicationInstanceManager {
 		}
 	}
 	
+	class ApplicationHolder {
+		Application application;
+		Server server;
+		ApplicationEventListener applicationEventListener;
+		CrontabManager crontabManager;
+	}
 }
