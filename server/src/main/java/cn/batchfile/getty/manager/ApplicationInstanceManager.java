@@ -115,23 +115,23 @@ public class ApplicationInstanceManager {
 		return ai;
 	}
 	
-	public void stop(String name) {
-		ApplicationHolder holder = applicationHolders.get(name);
+	public void stop(String dirName) {
+		ApplicationHolder holder = applicationHolders.get(dirName);
 		if (holder != null) {
 			
-			LOG.info("stop jetty for " + name);
+			LOG.info("stop jetty for " + dirName);
 			try {
 				holder.server.stop();
 			} catch (Exception e) {
 			}
 			
-			LOG.info("invoke application stop for " + name);
+			LOG.info("invoke application stop for " + dirName);
 			try {
 				holder.applicationEventListener.applicationStop();
 			} catch (Exception e) {
 			}
 			
-			LOG.info("stop crontab for " + name);
+			LOG.info("stop crontab for " + dirName);
 			try {
 				holder.crontabManager.stop();
 			} catch (Exception e) {

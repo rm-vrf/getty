@@ -27,6 +27,7 @@ public class ApplicationManager {
 	
 	private static final Logger logger = Logger.getLogger(ApplicationManager.class);
 	private Map<String, Application> applications = new HashMap<String, Application>();
+	private List<String> applicationNames = new ArrayList<String>();
 
 	public Application load(File dir) throws FileNotFoundException {
 
@@ -40,7 +41,7 @@ public class ApplicationManager {
 		loadApplication(application, new File(dir, "app.yaml"));
 		
 		//检查名称
-		if (applications.containsKey(application.getName())) {
+		if (applicationNames.contains(application.getName())) {
 			throw new RuntimeException("Duplicate application name: " + application.getName());
 		}
 		
@@ -54,12 +55,19 @@ public class ApplicationManager {
 		loadWebSocket(application, new File(dir, "websocket.yaml"));
 		
 		logger.info(String.format("load application from directory: %s, name: %s", dir, application.getName()));
-		applications.put(application.getName(), application);
+		applications.put(application.getDir().getName(), application);
+		applicationNames.add(application.getName());
 		return application;
 	}
 	
-	public void unload(String name) {
-		applications.remove(name);
+	public void unload(String dirName) {
+		logger.info("unload application, name: " + dirName);
+		Application application = applications.get(dirName);
+		if (application != null) {
+			applications.remove(dirName);
+			applicationNames.remove(application.getName());
+			application = null;
+		}
 	}
 	
 	private void loadClasspath(Application application, File dir) {

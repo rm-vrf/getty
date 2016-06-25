@@ -71,8 +71,8 @@ public class Main {
 			public void run() {
 				LOG.info("stop getty");
 				for (Application application : applications) {
-					aim.stop(application.getName());
-					am.unload(application.getName());
+					aim.stop(application.getDir().getName());
+					am.unload(application.getDir().getName());
 				}
 			}
 		});
