@@ -27,6 +27,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import cn.batchfile.getty.application.Application;
 import cn.batchfile.getty.application.ApplicationInstance;
 import cn.batchfile.getty.application.ErrorHandler;
+import cn.batchfile.getty.exceptions.InvalidApplicationDescriptorException;
 import cn.batchfile.getty.lang.ApplicationClassLoader;
 
 public class ApplicationInstanceManager {
@@ -34,7 +35,7 @@ public class ApplicationInstanceManager {
 	private static final Logger LOG = Logger.getLogger(ApplicationInstanceManager.class);
 	private Map<String, ApplicationHolder> applicationHolders = new HashMap<String, ApplicationHolder>();
 
-	public ApplicationInstance start(Application application) throws MalformedURLException {
+	public ApplicationInstance start(Application application) {
 		ApplicationInstance ai = new ApplicationInstance();
 		ai.setApplication(application);
 		ai.setStartTime(new Date());
@@ -214,24 +215,28 @@ public class ApplicationInstanceManager {
 		return sem;
 	}
 
-	private ClassLoader createClassLoader(Application application) throws MalformedURLException {
-		//构建classpath
-		List<File> classpath = new ArrayList<File>();
-		if (application.getClasses() != null && application.getClasses().exists()) {
-			classpath.add(application.getClasses());
+	private ClassLoader createClassLoader(Application application) {
+		try {
+			//构建classpath
+			List<File> classpath = new ArrayList<File>();
+			if (application.getClasses() != null && application.getClasses().exists()) {
+				classpath.add(application.getClasses());
+			}
+			for (File lib : application.getLibs()) {
+				classpath.add(lib);
+			}
+			
+			URL[] urls = new URL[classpath.size()];
+			for (int i = 0; i < classpath.size(); i ++) {
+				urls[i] = classpath.get(i).toURI().toURL();
+			}
+			
+			//构建classloader
+			ApplicationClassLoader cl = new ApplicationClassLoader(urls, getClass().getClassLoader());
+			return cl;
+		} catch (MalformedURLException e) {
+			throw new InvalidApplicationDescriptorException("error when create class loader", e);
 		}
-		for (File lib : application.getLibs()) {
-			classpath.add(lib);
-		}
-		
-		URL[] urls = new URL[classpath.size()];
-		for (int i = 0; i < classpath.size(); i ++) {
-			urls[i] = classpath.get(i).toURI().toURL();
-		}
-		
-		//构建classloader
-		ApplicationClassLoader cl = new ApplicationClassLoader(urls, getClass().getClassLoader());
-		return cl;
 	}
 	
 	private WebSocketManager createWebSocketManager(Application application, ApplicationInstance instance, 

@@ -22,6 +22,7 @@ import cn.batchfile.getty.application.Session;
 import cn.batchfile.getty.application.SessionListener;
 import cn.batchfile.getty.application.WebSocket;
 import cn.batchfile.getty.application.WebSocketHandler;
+import cn.batchfile.getty.exceptions.InvalidApplicationDescriptorException;
 
 public class ApplicationManager {
 	
@@ -29,39 +30,55 @@ public class ApplicationManager {
 	private Map<String, Application> applications = new HashMap<String, Application>();
 	private List<String> applicationNames = new ArrayList<String>();
 
-	public Application load(File dir) throws FileNotFoundException {
-
+	public List<Application> getApplications() {
+		List<Application> list = new ArrayList<Application>();
+		for (Application value : applications.values()) {
+			list.add(value);
+		}
+		return list;
+	}
+	
+	public Application load(File dir) {
+		logger.info("load application from " + dir);
 		Application application = new Application();
 		application.setDir(dir);
 		
 		//classes & lib
 		loadClasspath(application, dir);
 		
-		//解析app.yaml
-		loadApplication(application, new File(dir, "app.yaml"));
-		
-		//检查名称
-		if (applicationNames.contains(application.getName())) {
-			throw new RuntimeException("Duplicate application name: " + application.getName());
+		try {
+			//解析app.yaml
+			File descriptor = new File(dir, "app.yaml");
+			if (!descriptor.exists()) {
+				return null;
+			}
+			loadApplication(application, descriptor);
+			
+			//检查名称
+			if (applicationNames.contains(application.getName())) {
+				throw new RuntimeException("Duplicate application name: " + application.getName());
+			}
+			
+			//解析cron.yaml
+			loadCrontab(application, new File(dir, "cron.yaml"));
+			
+			//解析session.yaml
+			loadSession(application, new File(dir, "session.yaml"));
+			
+			//解析websocket.yaml
+			loadWebSocket(application, new File(dir, "websocket.yaml"));
+			
+			logger.info(String.format("load application from directory: %s, name: %s", dir, application.getName()));
+			applications.put(application.getDir().getName(), application);
+			applicationNames.add(application.getName());
+			return application;
+		} catch (FileNotFoundException e) {
+			throw new InvalidApplicationDescriptorException("error when load application from " + dir, e);
 		}
-		
-		//解析cron.yaml
-		loadCrontab(application, new File(dir, "cron.yaml"));
-		
-		//解析session.yaml
-		loadSession(application, new File(dir, "session.yaml"));
-		
-		//解析websocket.yaml
-		loadWebSocket(application, new File(dir, "websocket.yaml"));
-		
-		logger.info(String.format("load application from directory: %s, name: %s", dir, application.getName()));
-		applications.put(application.getDir().getName(), application);
-		applicationNames.add(application.getName());
-		return application;
 	}
 	
 	public void unload(String dirName) {
-		logger.info("unload application, name: " + dirName);
+		logger.info("unload application " + dirName);
 		Application application = applications.get(dirName);
 		if (application != null) {
 			applications.remove(dirName);
@@ -303,4 +320,5 @@ public class ApplicationManager {
 			}
 		}
 	}
+
 }

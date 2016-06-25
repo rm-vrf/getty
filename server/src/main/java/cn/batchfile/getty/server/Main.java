@@ -29,7 +29,9 @@ import cn.batchfile.getty.util.PlaceholderUtils;
 
 public class Main {
 	private static final Logger LOG = Logger.getLogger(Main.class);
-	
+	private ApplicationManager applicationManager = new ApplicationManager();
+	private ApplicationInstanceManager applicationInstanceManager = new ApplicationInstanceManager();
+
 	public static void main(String[] args) throws Exception {
 		
 		//解析参数
@@ -41,7 +43,7 @@ public class Main {
 		String pidFile = ParseCommandUtil.getArgs(args, "pid-file", "p");
 
 		//写pid文件
-		Main main = new Main();
+		final Main main = new Main();
 		if (StringUtils.isNotEmpty(pidFile)) {
 			main.writePidFile(pidFile);
 		}
@@ -54,25 +56,24 @@ public class Main {
 		List<File> appDirs = main.findAppDirs(baseDir, appsDir);
 		
 		//加载应用目录
-		final ApplicationManager am = new ApplicationManager();
-		final List<Application> applications = new ArrayList<Application>();
 		for (File appDir : appDirs) {
-			applications.add(am.load(appDir));
+			main.applicationManager.load(appDir);
 		}
 		
 		//启动应用
-		final ApplicationInstanceManager aim = new ApplicationInstanceManager();
+		List<Application> applications = main.applicationManager.getApplications();
 		for (Application application : applications) {
-			aim.start(application);
+			main.applicationInstanceManager.start(application);
 		}
 		
 		//线程钩子
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				LOG.info("stop getty");
+				List<Application> applications = main.applicationManager.getApplications();
 				for (Application application : applications) {
-					aim.stop(application.getDir().getName());
-					am.unload(application.getDir().getName());
+					main.applicationInstanceManager.stop(application.getDir().getName());
+					main.applicationManager.unload(application.getDir().getName());
 				}
 			}
 		});
@@ -91,16 +92,11 @@ public class Main {
 		observer.addListener(new FileAlterationListener() {
 			
 			@Override
-			public void onStop(FileAlterationObserver observer) {
-			}
-			
-			@Override
 			public void onStart(FileAlterationObserver observer) {
 			}
 			
 			@Override
-			public void onFileDelete(File file) {
-				LOG.info(propertiesFile.getName() +  " deleted");
+			public void onStop(FileAlterationObserver observer) {
 			}
 			
 			@Override
@@ -116,18 +112,20 @@ public class Main {
 			}
 			
 			@Override
-			public void onDirectoryDelete(File file) {
-				LOG.info("delete directory in log config dir");
+			public void onFileDelete(File file) {
+				LOG.info(propertiesFile.getName() +  " deleted");
 			}
 			
 			@Override
 			public void onDirectoryCreate(File file) {
-				LOG.info("create directory in log config dir");
 			}
 			
 			@Override
 			public void onDirectoryChange(File file) {
-				LOG.info("change directory in log config dir");
+			}
+			
+			@Override
+			public void onDirectoryDelete(File file) {
 			}
 		});
 		FileAlterationMonitor monitor = new FileAlterationMonitor(2000, observer);
@@ -154,7 +152,7 @@ public class Main {
 		}
 	}
 
-	private List<File> findAppDirs(String baseDir, String appsDir) {
+	private List<File> findAppDirs(String baseDir, String appsDir) throws Exception {
 		List<File> list = new ArrayList<File>();
 		File webapps = null;
 		if (StringUtils.isEmpty(appsDir)) {
@@ -165,8 +163,8 @@ public class Main {
 			webapps = new File(appsDir);
 		}
 		
-		//找到webapps路径, 遍历子目录
 		if (webapps.exists()) {
+			//找到webapps路径, 遍历子目录
 			LOG.info("application root: " + webapps);
 			File[] dirs = webapps.listFiles();
 			for (File dir : dirs) {
@@ -175,6 +173,60 @@ public class Main {
 					list.add(dir);
 				}
 			}
+			
+			//设置目录监听器
+			final File root = webapps;
+			FileAlterationObserver observer = new FileAlterationObserver(root, null, null);
+			observer.addListener(new FileAlterationListener() {
+
+				@Override
+				public void onStart(FileAlterationObserver observer) {
+				}
+
+				@Override
+				public void onStop(FileAlterationObserver observer) {
+				}
+				
+				@Override
+				public void onFileCreate(File file) {
+					if (file.getName().equals("app.yaml") 
+							&& file.getParentFile().getParentFile().equals(root)) {
+						
+						Application application = applicationManager.load(file.getParentFile());
+						if (application != null) {
+							applicationInstanceManager.start(application);
+						}
+					}
+				}
+
+				@Override
+				public void onFileChange(File file) {
+				}
+
+				@Override
+				public void onFileDelete(File file) {
+					if (file.getName().equals("app.yaml") 
+							&& file.getParentFile().getParentFile().equals(root)) {
+						
+						applicationInstanceManager.stop(file.getParentFile().getName());
+						applicationManager.unload(file.getParentFile().getName());
+					}
+				}
+
+				@Override
+				public void onDirectoryCreate(File file) {
+				}
+
+				@Override
+				public void onDirectoryChange(File file) {
+				}
+
+				@Override
+				public void onDirectoryDelete(File file) {
+				}
+			});
+			FileAlterationMonitor monitor = new FileAlterationMonitor(2000, observer);
+			monitor.start();
 		} 
 		
 		//不存在webapps目录，按照调试模式寻找
