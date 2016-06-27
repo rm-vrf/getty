@@ -1,13 +1,11 @@
 Getty内置对象
 =====
-# 1.HTTP内置对象
+# 1.HTTP对象
 
 ## 1.1 $request
-
-也可以写作```$req```
+也可以写成```$req```
 
 ###属性
-
 |属性|类型|读/写|说明
 |----|----|----|----
 |attributes|Map|只读|Returns an Map containing the name-values of the attributes available to this request.
@@ -34,21 +32,254 @@ Getty内置对象
 |uri|String|只读|Returns the part of this request’s URL from the protocol name up to the query string in the first line of the HTTP request.
 
 ## 1.2 $response
+也可以写成```$res```、```$resp```
 
 ###属性
+|属性|类型|读/写|说明
+|----|----|----|----
+|charset|String|读写|Returns or sets the character encoding (MIME charset) of the response being sent to the client, for example, UTF-8.
+|contentType|String|读写|Returns or sets the content type used for the MIME body sent in this response.
+|headers|Map|只读|Returns or sets a response header with the given name and date-value.
+|locale|String|读写|Returns or sets the locale of the response.
+|status|int|读写|Gets or sets the current status code of this response.
+
+###方法
+|方法|参数|返回值|说明
+|----|----|----|----
+|error|int code|Response|Sends an error response to the client using the specified status code and clears the buffer.
+|error|int code, String message|Response|Sends an error response to the client using the specified status and clears the buffer.
+|json|Object object|Response|输出Json序列化对象.
+|jsp|String view|Response|输出JSP视图.
+|print|Object object|Response|Prints a object.
+|println|Object object|Response|Prints a object and then terminates the line.
+|redirect|String location|Response|Sends a temporary redirect response to the client using the specified redirect location URL and clears the buffer.
+|write|InputStream stream|Response|Writes an input stream.
+|write|byte[] bytes|Response|Writes an array of byte.
+|write|Reader reader|Response|Writes a reader
+
+## 1.3 $application
+也可以写成```$app```
+
+###属性
+|属性|类型|读/写|说明
+|----|----|----|----
+|application|Application|只读|返回应用设置
+|attributes|Map|只读|Stores an attribute in this application. Attributes are keped across requests and sessions.
+|port|int|只读|Returns the port of the instancce.
+|startTime|Date|只读|Returns the start time of the instance.
+
+## 1.4 $session
+###属性
+|属性|类型|读/写|说明
+|----|----|----|----
+|attributes|Map|只读|Returns the object bound with the specified name in this session, or null if no object is bound under the name.
+|creationTime|long|只读|Returns the time when this session was created, measured in milliseconds since midnight January 1, 1970 GMT.
+|id|String|只读|Returns a string containing the unique identifier assigned to this session.
+|lastAccessedTime|long|只读|Returns the last time the client sent a request associated with this session, as the number of milliseconds since midnight January 1, 1970 GMT, and marked by the time the container received the request.
+|maxInactiveInterval|int|只读|Returns or sets the time, in seconds, between client requests before the servlet container will invalidate this session.
+|servletContext|ServletContext|只读|Returns the ServletContext to which this session belongs.
+
+## 1.5 $cookie
+$cookie对象是Map接口的实例，Key和Value分别为String类型、javax.servlet.http.Cookie类型。$cookie对象具有Map接口的所有方法，例如：size()、isEmpty()。
+
+###方法
+|方法|参数|返回值|说明
+|----|----|----|----
+|put|Cookie cookie|Cookie|Adds the specified cookie to the response.
+|put|String name, String value|Cookie|Adds the specified cookie to the response.
+|put|String name, String value, int maxAge|Cookie|Adds the specified cookie to the response.
+|put|String name, String value, String domain, String path, int maxAge, boolean secure|Cookie|Adds the specified cookie to the response.
+
+## 1.6 $logger
+也可以写成```$log```
+
+###属性
+|属性|类型|读/写|说明
+|----|----|----|----
+|debugEnabled|boolean|只读|Check whether this category is enabled for the DEBUG Level.
+|infoEnabled|boolean|只读|Check whether this category is enabled for the INFO Level.
+|traceEnabled|boolean|只读|Check whether this category is enabled for the TRACE Level.
+
+###方法
+|方法|参数|返回值|说明
+|----|----|----|----
+|debug|Object message|void|Log a message object with the DEBUG level.
+|debug|Object message, Throwable t|void|Log a message object with the DEBUG level including the stack trace of the Throwable passed as parameter.
+|error|Object message|void|Log a message object with the ERROR level.
+|error|Object message, Throwable t|void|Log a message object with the ERROR level including the stack trace of the Throwable passed as parameter.
+|fatal|Object message|void|Log a message object with the FATAL level.
+|fatal|Object message, Throwable t|void|Log a message object with the FATAL level including the stack trace of the Throwable passed as parameter.
+|info|Object message|void|Log a message object with the INFO level.
+|info|Object message, Throwable t|void|Log a message object with the INFO level including the stack trace of the Throwable passed as parameter.
+|trace|Object message|void|Log a message object with the TRACE level.
+|trace|Object message, Throwable t|void|Log a message object with the TRACE level including the stack trace of the Throwable passed as parameter.
+
+# 2.Websocket对象
+
+## 1.1 $request
+###属性
+
+|属性|类型|读/写|说明
+|----|----|----|----
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
 
 ###方法
 
-## 1.3 $application
-## 1.4 $session
-## 1.5 $cookie
-## 1.6 $logger
+|方法|参数|返回值|说明
+|----|----|----|----
+||||
+||||
+||||
+||||
+||||
+||||
+||||
 
-# 2.Websocket内置对象
-
-## 1.1 $request
 ## 1.2 $response
+###属性
+
+|属性|类型|读/写|说明
+|----|----|----|----
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+
+###方法
+
+|方法|参数|返回值|说明
+|----|----|----|----
+||||
+||||
+||||
+||||
+||||
+||||
+||||
+
 ## 1.3 $application
+###属性
+
+|属性|类型|读/写|说明
+|----|----|----|----
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+
+###方法
+
+|方法|参数|返回值|说明
+|----|----|----|----
+||||
+||||
+||||
+||||
+||||
+||||
+||||
+
 ## 1.4 $session
+###属性
+
+|属性|类型|读/写|说明
+|----|----|----|----
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+
+###方法
+
+|方法|参数|返回值|说明
+|----|----|----|----
+||||
+||||
+||||
+||||
+||||
+||||
+||||
+
 ## 1.5 $cookie
+###属性
+
+|属性|类型|读/写|说明
+|----|----|----|----
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+
+###方法
+
+|方法|参数|返回值|说明
+|----|----|----|----
+||||
+||||
+||||
+||||
+||||
+||||
+||||
+
 ## 1.6 $logger
+###属性
+
+|属性|类型|读/写|说明
+|----|----|----|----
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+|||只读|
+
+###方法
+
+|方法|参数|返回值|说明
+|----|----|----|----
+||||
+||||
+||||
+||||
+||||
+||||
+||||

@@ -193,6 +193,4 @@ def map = ['ok': true]
 $resp.json(map)
 ```
 
-使用方式请看sample中的例子，这里是对象的属性和方法说明：
-
-http://www.batchfile.cn/?p=88
+使用方式请看sample中的例子，这里是对象的属性和方法说明：[API.md](https://github.com/lane-cn/getty/blob/master/API.md)
