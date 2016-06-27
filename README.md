@@ -30,8 +30,8 @@ Getty为Java Web开发人员提供了一套动态脚本环境，适合用来快�
 
 # 1.下载
 
-- Getty服务：[http://121.199.25.213/getty-1.0.0-GA.tar.gz](http://121.199.25.213/getty-1.0.0-GA.tar.gz)
-- Getty服务带演示应用：[http://121.199.25.213/getty-with-demo-1.0.0-GA.tar.gz](http://121.199.25.213/getty-with-demo-1.0.0-GA.tar.gz)
+- Getty服务：[http://121.199.25.213/getty/getty-latest.tar.gz](http://121.199.25.213/getty/getty-latest.tar.gz)
+- Getty服务带演示应用：[http://121.199.25.213/getty/getty-with-demo-latest.tar.gz](http://121.199.25.213/getty/getty-with-demo-latest.tar.gz)
 
 # 2.安装
 
