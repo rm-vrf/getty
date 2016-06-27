@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+
 public class Cookie implements Map<String, HttpCookie> {
 	
 	private List<HttpCookie> cookies;
@@ -36,21 +38,53 @@ public class Cookie implements Map<String, HttpCookie> {
 	}
 
 	@Override
-	public HttpCookie get(Object key) {
-		return map().get(key);
+	public HttpCookie get(Object name) {
+		return map().get(name);
 	}
 
 	@Override
-	public HttpCookie put(String key, HttpCookie value) {
+	public HttpCookie put(String name, HttpCookie value) {
 		cookies.add(value);
-		//return map().put(key, value);
 		return value;
 	}
+	
+	public HttpCookie put(HttpCookie cookie) {
+		cookies.add(cookie);
+		return cookie;
+	}
+	
+	public HttpCookie put(String name, String value) {
+		return put(name, value, null, null, -1, false);
+	}
+	
+	public HttpCookie put(String name, String value, int maxAge) {
+		return put(name, value, null, null, maxAge, false);
+	}
+	
+	public HttpCookie put(String name, String value, String domain, String path, int maxAge, boolean secure) {
+		HttpCookie cookie = new HttpCookie(name, value);
+		
+		if (!StringUtils.isEmpty(domain)) {
+			cookie.setDomain(domain);
+		}
+		
+		if (StringUtils.isEmpty(path)) {
+			cookie.setPath("/");
+		} else {
+			cookie.setPath(path);
+		}
 
+		cookie.setMaxAge(maxAge);
+		cookie.setSecure(secure);
+		
+		return put(cookie);
+	}
+	
 	@Override
 	public HttpCookie remove(Object key) {
-		cookies.remove(key);
-		return map().remove(key);
+		HttpCookie cookie = map().get(key);
+		cookies.remove(cookie);
+		return cookie;
 	}
 
 	@Override
@@ -58,13 +92,11 @@ public class Cookie implements Map<String, HttpCookie> {
 		for (HttpCookie cookie : m.values()) {
 			cookies.add(cookie);
 		}
-		//map().putAll(m);
 	}
 
 	@Override
 	public void clear() {
 		cookies.clear();
-		//map().clear();
 	}
 
 	@Override

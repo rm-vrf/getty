@@ -95,7 +95,6 @@ public class Cookie implements Map<String, javax.servlet.http.Cookie> {
 		return put(cookie);
 	}
 	
-
 	@Override
 	public javax.servlet.http.Cookie remove(Object name) {
 		javax.servlet.http.Cookie cookie = get(name);
