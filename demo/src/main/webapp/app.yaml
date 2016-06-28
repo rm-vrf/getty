@@ -3,7 +3,7 @@ version: alpha-001
 port: 1025
 
 handlers:
-  - url: /doc/(year)/(id)
+  - url: '/doc/{year}/{id}'
     script: sample/doc.groovy
     http_headers:
       X-Foo-Header: foo

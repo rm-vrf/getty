@@ -53,8 +53,8 @@ public class MappingManager {
 			String urlPart = urlParts.get(i);
 			String requestPart = requestParts.get(i);
 			
-			if (StringUtils.startsWith(urlPart, "(") && StringUtils.endsWith(urlPart, ")")) {
-				vars.put(StringUtils.substringBetween(urlPart, "(", ")"), requestPart);
+			if (StringUtils.startsWith(urlPart, "{") && StringUtils.endsWith(urlPart, "}")) {
+				vars.put(StringUtils.substringBetween(urlPart, "{", "}"), requestPart);
 			} else if (!StringUtils.equals(urlPart, requestPart)) {
 				return false;
 			}
