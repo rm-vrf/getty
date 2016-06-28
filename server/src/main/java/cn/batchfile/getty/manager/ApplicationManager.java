@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -23,6 +25,7 @@ import cn.batchfile.getty.application.SessionListener;
 import cn.batchfile.getty.application.WebSocket;
 import cn.batchfile.getty.application.WebSocketHandler;
 import cn.batchfile.getty.exceptions.InvalidApplicationDescriptorException;
+import cn.batchfile.getty.util.PlaceholderUtils;
 
 public class ApplicationManager {
 	
@@ -113,6 +116,7 @@ public class ApplicationManager {
 		}
 		
 		Map<String, Object> map = (Map<String, Object>)Yaml.load(file);
+		resolveSystemPropeties(map);
 		List<Map<String, Object>> list = null;
 		
 		application.setWebSocket(new WebSocket());
@@ -175,6 +179,7 @@ public class ApplicationManager {
 		}
 		
 		Map<String, Object> map = (Map<String, Object>)Yaml.load(file);
+		resolveSystemPropeties(map);
 		List<Map<String, Object>> list = null;
 		
 		application.setSession(new Session());
@@ -205,6 +210,7 @@ public class ApplicationManager {
 		}
 		
 		Map<String, Object> map = (Map<String, Object>)Yaml.load(file);
+		resolveSystemPropeties(map);
 		List<Map<String, Object>> list = null;
 		
 		application.setCrontab(new Crontab());
@@ -233,6 +239,7 @@ public class ApplicationManager {
 	@SuppressWarnings("unchecked")
 	private void loadApplication(Application application, File file) throws FileNotFoundException {
 		Map<String, Object> map = (Map<String, Object>)Yaml.load(file);
+		resolveSystemPropeties(map);
 		List<Map<String, Object>> list = null;
 		
 		//基本属性
@@ -321,4 +328,28 @@ public class ApplicationManager {
 		}
 	}
 
+	private void resolveSystemPropeties(Map<String, Object> map) {
+		Properties properties = System.getProperties();
+		Map<String, String> vars = new HashMap<String, String>();
+		for (Entry<Object, Object> entry : properties.entrySet()) {
+			vars.put(entry.getKey().toString(), entry.getValue().toString());
+		}
+		
+		resolveSystemPropeties(map, vars);
+	}
+
+	private void resolveSystemPropeties(Map<String, Object> map, Map<String, String> vars) {
+		for (Entry<String, Object> entry : map.entrySet()) {
+			if (entry.getValue() != null) {
+				if (entry.getValue() instanceof String) {
+					entry.setValue(PlaceholderUtils.resolvePlaceholders(entry.getValue().toString(), vars));
+				} else if (entry.getValue() instanceof Map) {
+					@SuppressWarnings("unchecked")
+					Map<String, Object> m = (Map<String, Object>)entry.getValue();
+					resolveSystemPropeties(m, vars);
+				}
+			}
+		}
+	}
+	
 }
