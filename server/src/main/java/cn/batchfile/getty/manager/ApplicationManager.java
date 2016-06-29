@@ -335,6 +335,8 @@ public class ApplicationManager {
 			vars.put(entry.getKey().toString(), entry.getValue().toString());
 		}
 		
+		vars.putAll(System.getenv());
+		
 		resolveSystemPropeties(map, vars);
 	}
 
