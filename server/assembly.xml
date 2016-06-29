@@ -25,14 +25,15 @@
 			<outputDirectory>bin</outputDirectory>
 			<directory>src/main/resources/misc</directory>
 			<includes>
-				<include>**/*</include>
+				<include>*.sh</include>
+				<include>*.bat</include>
 			</includes>
 		</fileSet>
 		<fileSet>
 			<outputDirectory>conf</outputDirectory>
-			<directory>src/main/resources</directory>
+			<directory>src/main/resources/misc</directory>
 			<includes>
-				<include>log.properties</include>
+				<include>*.properties</include>
 			</includes>
 		</fileSet>
 		<fileSet>

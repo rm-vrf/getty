@@ -110,7 +110,7 @@ public class CrontabManager {
 	}
 
 	public void execute(String file, String expression, String description) {
-		LOG.info("execute crontab: " + file + ", " + expression + ", " + description);
+		LOG.debug("execute crontab: " + file + ", " + expression + ", " + description);
 
 		Logger bindingLogger = Logger.getLogger(file);
 		

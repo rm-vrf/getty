@@ -49,7 +49,7 @@ public class Main {
 		}
 		
 		//加载日志
-		main.configLog(baseDir, "conf/log.properties");
+		main.configLog(baseDir, "conf/log4j.properties");
 		LOG.info("  ____      _   _           ");
 		LOG.info(" / ___| ___| |_| |_ _   _   ");
 		LOG.info("| |  _ / _ \\ __| __| | | |  ");
@@ -140,7 +140,7 @@ public class Main {
 	
 	private void configLog(File file, Map<String, String> vars) {
 		if (file.exists()) {
-			LOG.info("load log.properties from " + file.getAbsolutePath());
+			LOG.info("load log4j.properties from " + file.getAbsolutePath());
 			try {
 				String content = FileUtils.readFileToString(file);
 				content = PlaceholderUtils.resolvePlaceholders(content, vars);
@@ -154,7 +154,7 @@ public class Main {
 				throw new RuntimeException("error when load log config", e);
 			}
 		} else {
-			LOG.info("cannot find log.properties in " + file.getAbsolutePath());
+			LOG.info("cannot find log4j.properties in " + file.getAbsolutePath());
 		}
 	}
 
