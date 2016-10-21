@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Application {
 
-	private File dir;
+	private File directory;
 	private File classes;
 	private List<File> libs;
 	private String name;
@@ -22,14 +22,14 @@ public class Application {
 	private Session session;
 	private WebSocket webSocket;
 	
-	public File getDir() {
-		return dir;
+	public File getDirectory() {
+		return directory;
 	}
-	
-	public void setDir(File dir) {
-		this.dir = dir;
+
+	public void setDirectory(File directory) {
+		this.directory = directory;
 	}
-	
+
 	public File getClasses() {
 		return classes;
 	}

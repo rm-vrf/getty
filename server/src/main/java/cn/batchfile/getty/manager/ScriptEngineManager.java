@@ -45,7 +45,7 @@ public class ScriptEngineManager {
 			if (scriptEngine == null) {
 				synchronized (this) {
 					if (scriptEngine == null) {
-						String path = application.getDir().getAbsolutePath();
+						String path = application.getDirectory().getAbsolutePath();
 						scriptEngine = new GroovyScriptEngine(path, classLoader);
 					}
 				}

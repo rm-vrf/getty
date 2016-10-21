@@ -5,9 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -21,26 +19,24 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import cn.batchfile.getty.application.Application;
-import cn.batchfile.getty.manager.ApplicationInstanceManager;
-import cn.batchfile.getty.manager.ApplicationManager;
 import cn.batchfile.getty.util.ParseCommandUtil;
 import cn.batchfile.getty.util.PlaceholderUtils;
 
 public class Main {
 	private static final Logger LOG = Logger.getLogger(Main.class);
-	private ApplicationManager applicationManager = new ApplicationManager();
-	private ApplicationInstanceManager applicationInstanceManager = new ApplicationInstanceManager();
 
 	public static void main(String[] args) throws Exception {
 		
 		//解析参数
+		String pidFile = ParseCommandUtil.getArgs(args, "pid-file", "p");
 		String baseDir = ParseCommandUtil.getArgs(args, "base-dir", "b");
+		String appsDir = ParseCommandUtil.getArgs(args, "apps-dir", "a");
+		String max = ParseCommandUtil.getArgs(args, "max-threads", "x");
+		String min = ParseCommandUtil.getArgs(args, "min-threads", "s");
+		String idle = ParseCommandUtil.getArgs(args, "idle-timeout", "i");
 		if (StringUtils.isEmpty(baseDir)) {
 			baseDir = ".";
 		}
-		String appsDir = ParseCommandUtil.getArgs(args, "apps-dir", "a");
-		String pidFile = ParseCommandUtil.getArgs(args, "pid-file", "p");
 
 		//写pid文件
 		final Main main = new Main();
@@ -58,29 +54,26 @@ public class Main {
 		LOG.info("                    |___/   ");
 		LOG.info("Groovy on Jetty!            ");
 		
-		//寻找应用目录
-		List<File> appDirs = main.findAppDirs(baseDir, appsDir);
-		
-		//加载应用目录
-		for (File appDir : appDirs) {
-			main.applicationManager.load(appDir);
+		//启动服务
+		final Getty getty = new Getty();
+		getty.setApplicationsDirectory(appsDir);
+		getty.setBaseDirectory(baseDir);
+		if (StringUtils.isNumeric(max)) {
+			getty.setMaxThreads(Integer.valueOf(max));
 		}
-		
-		//启动应用
-		List<Application> applications = main.applicationManager.getApplications();
-		for (Application application : applications) {
-			main.applicationInstanceManager.start(application);
+		if (StringUtils.isNumeric(min)) {
+			getty.setMinThreads(Integer.valueOf(min));
 		}
+		if (StringUtils.isNumeric(idle)) {
+			getty.setIdleTimeout(Integer.valueOf(idle));
+		}
+		getty.start();
 		
 		//线程钩子
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				LOG.info("stop getty");
-				List<Application> applications = main.applicationManager.getApplications();
-				for (Application application : applications) {
-					main.applicationInstanceManager.stop(application.getDir().getName());
-					main.applicationManager.unload(application.getDir().getName());
-				}
+				getty.stop();
 			}
 		});
 	}
@@ -156,100 +149,6 @@ public class Main {
 		} else {
 			LOG.info("cannot find log4j.properties in " + file.getAbsolutePath());
 		}
-	}
-
-	private List<File> findAppDirs(String baseDir, String appsDir) throws Exception {
-		List<File> list = new ArrayList<File>();
-		File webapps = null;
-		if (StringUtils.isEmpty(appsDir)) {
-			//命令行没有给apps-dir参数，寻找默认的位置
-			webapps = new File(baseDir, "webapps");
-		} else {
-			//命令行给了apps-dir参数，按照参数寻找 
-			webapps = new File(appsDir);
-		}
-		
-		if (webapps.exists()) {
-			//找到webapps路径, 遍历子目录
-			LOG.info("application root: " + webapps);
-			File[] dirs = webapps.listFiles();
-			for (File dir : dirs) {
-				//目录里面有项目文件，加载这个目录
-				if (dir.isDirectory() && new File(dir, "app.yaml").exists()) {
-					list.add(dir);
-				}
-			}
-			
-			//设置目录监听器
-			final File root = webapps;
-			FileAlterationObserver observer = new FileAlterationObserver(root, null, null);
-			observer.addListener(new FileAlterationListener() {
-
-				@Override
-				public void onStart(FileAlterationObserver observer) {
-				}
-
-				@Override
-				public void onStop(FileAlterationObserver observer) {
-				}
-				
-				@Override
-				public void onFileCreate(File file) {
-					if (file.getName().equals("app.yaml") 
-							&& file.getParentFile().getParentFile().equals(root)) {
-						
-						Application application = applicationManager.load(file.getParentFile());
-						if (application != null) {
-							applicationInstanceManager.start(application);
-						}
-					}
-				}
-
-				@Override
-				public void onFileChange(File file) {
-				}
-
-				@Override
-				public void onFileDelete(File file) {
-					if (file.getName().equals("app.yaml") 
-							&& file.getParentFile().getParentFile().equals(root)) {
-						
-						applicationInstanceManager.stop(file.getParentFile().getName());
-						applicationManager.unload(file.getParentFile().getName());
-					}
-				}
-
-				@Override
-				public void onDirectoryCreate(File file) {
-				}
-
-				@Override
-				public void onDirectoryChange(File file) {
-				}
-
-				@Override
-				public void onDirectoryDelete(File file) {
-				}
-			});
-			FileAlterationMonitor monitor = new FileAlterationMonitor(2000, observer);
-			monitor.start();
-		} 
-		
-		//不存在webapps目录，按照调试模式寻找
-		if (!webapps.exists()) {
-			String[] dirs = new String[] {"webapp", "src/main/webapp"};
-			for (String dir : dirs) {
-				File app = new File(baseDir, dir);
-				if (app.exists() && app.isDirectory() 
-						&& new File(app, "app.yaml").exists()) {
-					list.add(app);
-					LOG.info("application root: " + app);
-					break;
-				}
-			}
-		}
-		
-		return list;
 	}
 
 	private void writePidFile(String pidFile) throws IOException {

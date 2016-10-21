@@ -133,7 +133,7 @@ public class ServletManager implements Servlet {
 		}
 		
 		//映射文件
-		File file = new File(application.getDir(), uri);
+		File file = new File(application.getDirectory(), uri);
 		
 		//如果映射文件是个目录，尝试默认文档
 		if (file.exists() && file.isDirectory()) {

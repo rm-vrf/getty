@@ -44,7 +44,7 @@ public class ApplicationManager {
 	public Application load(File dir) {
 		logger.info("load application from " + dir);
 		Application application = new Application();
-		application.setDir(dir);
+		application.setDirectory(dir);;
 		
 		//classes & lib
 		loadClasspath(application, dir);
@@ -72,7 +72,7 @@ public class ApplicationManager {
 			loadWebSocket(application, new File(dir, "websocket.yaml"));
 			
 			logger.info(String.format("load application from directory: %s, name: %s", dir, application.getName()));
-			applications.put(application.getDir().getName(), application);
+			applications.put(application.getDirectory().getName(), application);
 			applicationNames.add(application.getName());
 			return application;
 		} catch (FileNotFoundException e) {

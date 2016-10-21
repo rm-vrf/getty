@@ -46,7 +46,7 @@ public class ApplicationInstanceManager {
 		WebAppContext context = new WebAppContext();
 		context.setMaxFormContentSize(Integer.MAX_VALUE);
 		context.setContextPath("/");
-		context.setWar(application.getDir().getAbsolutePath());
+		context.setWar(application.getDirectory().getAbsolutePath());
 		context.setServer(server);
 		
 		HashLoginService loginService = new HashLoginService("GETTY-SECURITY-REALM-" + application.getName());
@@ -94,7 +94,7 @@ public class ApplicationInstanceManager {
 		
 		//setup applicatio holder
 		ApplicationHolder ah = createApplicationHolder(application, server, ael, crontabManager);
-		applicationHolders.put(application.getDir().getName(), ah);
+		applicationHolders.put(application.getDirectory().getName(), ah);
 		
 		try {
 			//启动web服务
