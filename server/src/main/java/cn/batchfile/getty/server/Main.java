@@ -31,9 +31,6 @@ public class Main {
 		String pidFile = ParseCommandUtil.getArgs(args, "pid-file", "p");
 		String baseDir = ParseCommandUtil.getArgs(args, "base-dir", "b");
 		String appsDir = ParseCommandUtil.getArgs(args, "apps-dir", "a");
-		String max = ParseCommandUtil.getArgs(args, "max-threads", "x");
-		String min = ParseCommandUtil.getArgs(args, "min-threads", "s");
-		String idle = ParseCommandUtil.getArgs(args, "idle-timeout", "i");
 		if (StringUtils.isEmpty(baseDir)) {
 			baseDir = ".";
 		}
@@ -54,19 +51,12 @@ public class Main {
 		LOG.info("                    |___/   ");
 		LOG.info("Groovy on Jetty!            ");
 		
-		//启动服务
+		//设置服务参数
 		final Getty getty = new Getty();
 		getty.setApplicationsDirectory(appsDir);
 		getty.setBaseDirectory(baseDir);
-		if (StringUtils.isNumeric(max)) {
-			getty.setMaxThreads(Integer.valueOf(max));
-		}
-		if (StringUtils.isNumeric(min)) {
-			getty.setMinThreads(Integer.valueOf(min));
-		}
-		if (StringUtils.isNumeric(idle)) {
-			getty.setIdleTimeout(Integer.valueOf(idle));
-		}
+		
+		//启动服务
 		getty.start();
 		
 		//线程钩子

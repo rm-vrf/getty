@@ -41,7 +41,7 @@ public class ApplicationInstanceManager {
 		ai.setStartTime(new Date());
 		
 		Server server = new Server(application.getPort());
-		setRuntimeParameters(server);
+		setRuntimeParameters(server, application);
 		
 		WebAppContext context = new WebAppContext();
 		context.setMaxFormContentSize(Integer.MAX_VALUE);
@@ -266,25 +266,18 @@ public class ApplicationInstanceManager {
 		return servlet;
 	}
 
-	private void setRuntimeParameters(Server server) {
-		String s = System.getProperty("max.threads", "-1");
-		int maxThreads = Integer.valueOf(s);
-		s = System.getProperty("min.threads", "-1");
-		int minThreads = Integer.valueOf(s);
-		s = System.getProperty("max.idle.time", "-1");
-		int maxIdleTime = Integer.valueOf(s);
-		
+	private void setRuntimeParameters(Server server, Application application) {
 		ThreadPool pool = server.getThreadPool();
 		if (pool instanceof QueuedThreadPool) {
 			QueuedThreadPool qtp = (QueuedThreadPool)pool;
-			if (maxThreads > 0) {
-				qtp.setMaxThreads(maxIdleTime);
+			if (application.getThreadPool().getMaxThreads() > 0) {
+				qtp.setMaxThreads(application.getThreadPool().getMaxThreads());
 			}
-			if (minThreads > 0) {
-				qtp.setMinThreads(minThreads);
+			if (application.getThreadPool().getMinThreads() > 0) {
+				qtp.setMinThreads(application.getThreadPool().getMinThreads());
 			}
-			if (maxIdleTime > 0) {
-				qtp.setIdleTimeout(maxIdleTime);
+			if (application.getThreadPool().getIdleTimeout() > 0) {
+				qtp.setIdleTimeout(application.getThreadPool().getIdleTimeout());
 			}
 		}
 	}

@@ -21,6 +21,7 @@ public class Application {
 	private Crontab crontab;
 	private Session session;
 	private WebSocket webSocket;
+	private ThreadPool threadPool;
 	
 	public File getDirectory() {
 		return directory;
@@ -148,5 +149,13 @@ public class Application {
 
 	public void setWebSocket(WebSocket webSocket) {
 		this.webSocket = webSocket;
+	}
+
+	public ThreadPool getThreadPool() {
+		return threadPool;
+	}
+
+	public void setThreadPool(ThreadPool threadPool) {
+		this.threadPool = threadPool;
 	}
 }

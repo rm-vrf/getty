@@ -22,6 +22,7 @@ import cn.batchfile.getty.application.Filter;
 import cn.batchfile.getty.application.Handler;
 import cn.batchfile.getty.application.Session;
 import cn.batchfile.getty.application.SessionListener;
+import cn.batchfile.getty.application.ThreadPool;
 import cn.batchfile.getty.application.WebSocket;
 import cn.batchfile.getty.application.WebSocketHandler;
 import cn.batchfile.getty.exceptions.InvalidApplicationDescriptorException;
@@ -324,6 +325,21 @@ public class ApplicationManager {
 				handler.setFile(element.get("file").toString());
 				
 				application.getErrorHandlers().add(handler);
+			}
+		}
+		
+		//线程池
+		application.setThreadPool(new ThreadPool());
+		if (map.containsKey("thread_pool")) {
+			Map<String, Object> m = (Map<String, Object>)map.get("thread_pool");
+			if (m.containsKey("max_threads")) {
+				application.getThreadPool().setMaxThreads(Integer.valueOf(m.get("max_threads").toString()));
+			}
+			if (m.containsKey("min_threads")) {
+				application.getThreadPool().setMinThreads(Integer.valueOf(m.get("min_threads").toString()));
+			}
+			if (m.containsKey("idle_timeout")) {
+				application.getThreadPool().setIdleTimeout(Integer.valueOf(m.get("idle_timeout").toString()));
 			}
 		}
 	}
