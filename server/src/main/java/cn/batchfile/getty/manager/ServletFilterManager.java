@@ -113,7 +113,7 @@ public class ServletFilterManager implements Filter {
 		binding.put("$logger", bindingLogger);
 		binding.put("$log", bindingLogger);
 
-		Object r = scriptEngineManager.run(file, binding);
+		Object r = scriptEngineManager.runFile(file, binding);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("shell return value: " + r);
 		}

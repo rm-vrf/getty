@@ -80,7 +80,7 @@ public class Getty {
 			File[] dirs = webapps.listFiles();
 			for (File dir : dirs) {
 				//目录里面有项目文件，加载这个目录
-				if (dir.isDirectory() && new File(dir, "app.yaml").exists()) {
+				if (new Application(dir).getDescriptor() != null) {
 					list.add(dir);
 				}
 			}
@@ -100,10 +100,9 @@ public class Getty {
 				
 				@Override
 				public void onFileCreate(File file) {
-					if (file.getName().equals("app.yaml") 
-							&& file.getParentFile().getParentFile().equals(root)) {
-						
-						Application application = applicationManager.load(file.getParentFile());
+					File directory = findApplicationDirectory(file);
+					if (directory != null) {
+						Application application = applicationManager.load(directory);
 						if (application != null) {
 							applicationInstanceManager.start(application);
 						}
@@ -116,11 +115,10 @@ public class Getty {
 
 				@Override
 				public void onFileDelete(File file) {
-					if (file.getName().equals("app.yaml") 
-							&& file.getParentFile().getParentFile().equals(root)) {
-						
-						applicationInstanceManager.stop(file.getParentFile().getName());
-						applicationManager.unload(file.getParentFile().getName());
+					File directory = findApplicationDirectory(file);
+					if (directory != null) {
+						applicationInstanceManager.stop(directory.getName());
+						applicationManager.unload(directory.getName());
 					}
 				}
 
@@ -135,6 +133,19 @@ public class Getty {
 				@Override
 				public void onDirectoryDelete(File file) {
 				}
+				
+				private File findApplicationDirectory(File descriptor) {
+					String name = descriptor.getName().toLowerCase();
+					if (name.equals("app.yaml")) {
+						return descriptor.getParentFile();
+					} else if (name.equals("web.xml")) {
+						File info = descriptor.getParentFile();
+						if (info != null && info.exists()) {
+							return info.getParentFile();
+						}
+					}
+					return null;
+				}
 			});
 			FileAlterationMonitor monitor = new FileAlterationMonitor(2000, observer);
 			monitor.start();
@@ -145,8 +156,7 @@ public class Getty {
 			String[] dirs = new String[] {"webapp", "src/main/webapp"};
 			for (String dir : dirs) {
 				File app = new File(baseDir, dir);
-				if (app.exists() && app.isDirectory() 
-						&& new File(app, "app.yaml").exists()) {
+				if (new Application(app).getDescriptor() != null) {
 					list.add(app);
 					LOG.info("application root: " + app);
 					break;

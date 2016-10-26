@@ -195,7 +195,7 @@ public class WebSocketInstance {
 		bindingResponse.setCharset(application.getCharsetEncoding());
 		
 		//execute script file
-		Object r = scriptEngineManager.run(file, binding);
+		Object r = scriptEngineManager.runFile(file, binding);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("shell return value: " + r);
 		}

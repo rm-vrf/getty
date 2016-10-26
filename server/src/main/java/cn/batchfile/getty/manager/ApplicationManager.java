@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.ho.yaml.Yaml;
 
 import cn.batchfile.getty.application.Application;
+import cn.batchfile.getty.application.Application.Mode;
 import cn.batchfile.getty.application.ApplicationListener;
 import cn.batchfile.getty.application.Cron;
 import cn.batchfile.getty.application.Crontab;
@@ -44,41 +45,30 @@ public class ApplicationManager {
 	
 	public Application load(File dir) {
 		logger.info("load application from " + dir);
-		Application application = new Application();
-		application.setDirectory(dir);;
+		Application application = new Application(dir);
 		
-		//classes & lib
-		loadClasspath(application, dir);
-		
-		try {
-			//解析app.yaml
-			File descriptor = new File(dir, "app.yaml");
-			if (!descriptor.exists()) {
-				return null;
-			}
-			loadApplication(application, descriptor);
-			
-			//检查名称
-			if (applicationNames.contains(application.getName())) {
-				throw new RuntimeException("Duplicate application name: " + application.getName());
-			}
-			
-			//解析cron.yaml
-			loadCrontab(application, new File(dir, "cron.yaml"));
-			
-			//解析session.yaml
-			loadSession(application, new File(dir, "session.yaml"));
-			
-			//解析websocket.yaml
-			loadWebSocket(application, new File(dir, "websocket.yaml"));
-			
-			logger.info(String.format("load application from directory: %s, name: %s", dir, application.getName()));
-			applications.put(application.getDirectory().getName(), application);
-			applicationNames.add(application.getName());
-			return application;
-		} catch (FileNotFoundException e) {
-			throw new InvalidApplicationDescriptorException("error when load application from " + dir, e);
+		//return null if descriptor file not exists
+		if (application.getDescriptor() == null || !application.getDescriptor().exists()) {
+			return null;
 		}
+		
+		//load application
+		if (application.getMode() == Mode.getty) {
+			loadGettyApplication(application, dir);
+		} else if (application.getMode() == Mode.j2ee) {
+			logger.info("j2ee application");
+			loadJ2EEApplication(application, dir);
+		}
+		
+		//检查名称
+		if (applicationNames.contains(application.getName())) {
+			throw new RuntimeException("Duplicate application name: " + application.getName());
+		}
+		
+		logger.info(String.format("load application from directory: %s, name: %s", dir, application.getName()));
+		applications.put(application.getDirectory().getName(), application);
+		applicationNames.add(application.getName());
+		return application;
 	}
 	
 	public void unload(String dirName) {
@@ -91,7 +81,38 @@ public class ApplicationManager {
 		}
 	}
 	
-	private void loadClasspath(Application application, File dir) {
+	private void loadJ2EEApplication(Application application, File dir) {
+		//classes & lib
+		loadClasspath(application);
+
+		//set name
+		application.setName(dir.getName());
+	}
+	
+	private void loadGettyApplication(Application application, File dir) {
+		//classes & lib
+		loadClasspath(application);
+		
+		try {
+			//加载基本属性
+			loadApplication(application, application.getDescriptor());
+			
+			//解析cron.yaml
+			loadCrontab(application, new File(dir, "cron.yaml"));
+			
+			//解析session.yaml
+			loadSession(application, new File(dir, "session.yaml"));
+			
+			//解析websocket.yaml
+			loadWebSocket(application, new File(dir, "websocket.yaml"));
+			
+		} catch (FileNotFoundException e) {
+			throw new InvalidApplicationDescriptorException("error when load application from " + dir, e);
+		}
+	}
+	
+	private void loadClasspath(Application application) {
+		File dir =  application.getDescriptor().getParentFile();
 		File classes = new File(dir, "classes");
 		if (classes.exists() && classes.isDirectory()) {
 			application.setClasses(classes);

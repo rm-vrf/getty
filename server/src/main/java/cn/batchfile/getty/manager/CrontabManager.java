@@ -120,6 +120,6 @@ public class CrontabManager {
 		binding.put("$logger", bindingLogger);
 		binding.put("$log", bindingLogger);
 
-		scriptEngineManager.run(file, binding);
+		scriptEngineManager.runFile(file, binding);
 	}
 }

@@ -25,6 +25,7 @@ import org.eclipse.jetty.util.thread.ThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import cn.batchfile.getty.application.Application;
+import cn.batchfile.getty.application.Application.Mode;
 import cn.batchfile.getty.application.ApplicationInstance;
 import cn.batchfile.getty.application.ErrorHandler;
 import cn.batchfile.getty.exceptions.InvalidApplicationDescriptorException;
@@ -48,6 +49,9 @@ public class ApplicationInstanceManager {
 		context.setContextPath("/");
 		context.setWar(application.getDirectory().getAbsolutePath());
 		context.setServer(server);
+		if (application.getMode() == Mode.j2ee) {
+			context.setDescriptor(application.getDescriptor().getAbsolutePath());
+		}
 		
 		HashLoginService loginService = new HashLoginService("GETTY-SECURITY-REALM-" + application.getName());
 		context.getSecurityHandler().setLoginService(loginService);
@@ -59,56 +63,61 @@ public class ApplicationInstanceManager {
 		//create script manager
 		ScriptEngineManager sem = createScriptEngineManager(application, cl);
 
-		//apply servlet
-		ServletManager servletManager = createServletManager(application, ai, cl, sem);
-		context.addServlet(new ServletHolder(servletManager), "/");
+		if (application.getMode() == Mode.getty) {
+			//apply servlet
+			ServletManager servletManager = createServletManager(application, ai, cl, sem);
+			context.addServlet(new ServletHolder(servletManager), "/");
 		
-		//apply websocket servlet
-		if (application.getWebSocket() != null) {
-			WebSocketManager socketManager = createWebSocketManager(application, ai, cl, sem);
-			context.addServlet(new ServletHolder(socketManager), application.getWebSocket().getUrlPattern());
-		}
+			//apply websocket servlet
+			if (application.getWebSocket() != null) {
+				WebSocketManager socketManager = createWebSocketManager(application, ai, cl, sem);
+				context.addServlet(new ServletHolder(socketManager), application.getWebSocket().getUrlPattern());
+			}
 
-		//set session listener
-		SessionEventListener sessionEventListener = createSessionEventListener(application, ai, sem);
-		context.addEventListener(sessionEventListener);
+			//set session listener
+			SessionEventListener sessionEventListener = createSessionEventListener(application, ai, sem);
+			context.addEventListener(sessionEventListener);
 		
-		//set session timeout
-		int minutes = application.getSession() == null ? 0 : application.getSession().getTimeout();
-		if (minutes > 0) {
-			context.getSessionHandler().getSessionManager().setMaxInactiveInterval(minutes * 60);
-		}
+			//set session timeout
+			int minutes = application.getSession() == null ? 0 : application.getSession().getTimeout();
+			if (minutes > 0) {
+				context.getSessionHandler().getSessionManager().setMaxInactiveInterval(minutes * 60);
+			}
 		
-		//create applicaiton listener
-		ApplicationEventListener ael = createApplicationEventListener(application, ai, sem);
-		
-		//setup filtes
-		ServletFilterManager filterManager = createServletFilterManager(application, ai, sem);
-		context.addFilter(new FilterHolder(filterManager), "*", EnumSet.of(DispatcherType.REQUEST));
+			//setup filters
+			ServletFilterManager filterManager = createServletFilterManager(application, ai, sem);
+			context.addFilter(new FilterHolder(filterManager), "*", EnumSet.of(DispatcherType.REQUEST));
 
-		//setup error pages
-		setupErrorPages(context, application.getErrorHandlers());
-		
-		//setup crontab
-		CrontabManager crontabManager = createCrontabManager(application, ai, sem);
+			//setup error pages
+			setupErrorPages(context, application.getErrorHandlers());
+		}
 		
 		//setup applicatio holder
-		ApplicationHolder ah = createApplicationHolder(application, server, ael, crontabManager);
+		ApplicationHolder ah = createApplicationHolder(application, server);
 		applicationHolders.put(application.getDirectory().getName(), ah);
-		
+
 		try {
 			//启动web服务
-			server.start();
+			Map<String, Object> vars = new HashMap<String, Object>();
+			vars.put("$server", server);
+			sem.runScript("$server.start();", vars);
+			
+			//得到运行端口
 			int port = ((ServerConnector)server.getConnectors()[0]).getLocalPort();
-			
-			LOG.info(String.format("start %s at port: %s", application.getName(), port));
 			ai.setPort(port);
-			
-			//执行应用监听器
-			ael.applicationStart();
-			
-			//执行定时器
-			crontabManager.start();
+			LOG.info(String.format("start %s at port: %s", application.getName(), port));
+
+			if (application.getMode() == Mode.getty) {
+				//执行应用监听器
+				ApplicationEventListener ael = createApplicationEventListener(application, ai, sem);
+				ael.applicationStart();
+				ah.applicationEventListener = ael;
+				
+				//执行定时器
+				CrontabManager crontabManager = createCrontabManager(application, ai, sem);
+				crontabManager.start();
+				ah.crontabManager = crontabManager;
+			}
 		} catch (Exception e) {
 			throw new RuntimeException("error when start " + application.getName(), e);
 		}
@@ -140,12 +149,9 @@ public class ApplicationInstanceManager {
 		}
 	}
 	
-	private ApplicationHolder createApplicationHolder(Application application, Server server,
-			ApplicationEventListener ael, CrontabManager crontabManager) {
+	private ApplicationHolder createApplicationHolder(Application application, Server server) {
 		ApplicationHolder ah = new ApplicationHolder();
 		ah.server = server;
-		ah.applicationEventListener = ael;
-		ah.crontabManager = crontabManager;
 		ah.application = application;
 		return ah;
 	}
@@ -270,14 +276,15 @@ public class ApplicationInstanceManager {
 		ThreadPool pool = server.getThreadPool();
 		if (pool instanceof QueuedThreadPool) {
 			QueuedThreadPool qtp = (QueuedThreadPool)pool;
-			if (application.getThreadPool().getMaxThreads() > 0) {
-				qtp.setMaxThreads(application.getThreadPool().getMaxThreads());
+			cn.batchfile.getty.application.ThreadPool config = application.getThreadPool();
+			if (config != null && config.getMaxThreads() > 0) {
+				qtp.setMaxThreads(config.getMaxThreads());
 			}
-			if (application.getThreadPool().getMinThreads() > 0) {
-				qtp.setMinThreads(application.getThreadPool().getMinThreads());
+			if (config != null && config.getMinThreads() > 0) {
+				qtp.setMinThreads(config.getMinThreads());
 			}
-			if (application.getThreadPool().getIdleTimeout() > 0) {
-				qtp.setIdleTimeout(application.getThreadPool().getIdleTimeout());
+			if (config != null && config.getIdleTimeout() > 0) {
+				qtp.setIdleTimeout(config.getIdleTimeout());
 			}
 		}
 	}

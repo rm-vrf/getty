@@ -302,7 +302,7 @@ public class ServletManager implements Servlet {
 		response.setCharacterEncoding(application.getCharsetEncoding());
 		
 		//execute script file
-		Object r = scriptEngineManager.run(file.getAbsolutePath(), binding);
+		Object r = scriptEngineManager.runFile(file.getAbsolutePath(), binding);
 		if (logger.isDebugEnabled()) {
 			logger.debug("shell return value: " + r);
 		}

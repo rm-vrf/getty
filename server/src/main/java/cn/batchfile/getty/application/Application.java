@@ -4,6 +4,10 @@ import java.io.File;
 import java.util.List;
 
 public class Application {
+	public enum Mode {
+		getty,
+		j2ee
+	}
 
 	private File directory;
 	private File classes;
@@ -23,12 +27,42 @@ public class Application {
 	private WebSocket webSocket;
 	private ThreadPool threadPool;
 	
-	public File getDirectory() {
-		return directory;
+	public Application(File directory) {
+		this.directory = directory;
+	}
+	
+	public Mode getMode() {
+		File descriptor = getDescriptor();
+		if (descriptor != null) {
+			String name = descriptor.getName().toLowerCase();
+			if (name.equals("app.yaml")) {
+				return Mode.getty;
+			} else if (name.equals("web.xml")) {
+				return Mode.j2ee;
+			}
+		}
+		return null;
+	}
+	
+	public File getDescriptor() {
+		File descriptor = new File(directory, "app.yaml");
+		if (descriptor.exists()) {
+			return descriptor;
+		} else {
+			//如果没有yaml描述符，判断是不是J2EE应用
+			File info = new File(directory, "WEB-INF");
+			if (info.exists() && info.isDirectory()) {
+				descriptor = new File(info, "web.xml");
+				if (descriptor.exists()) {
+					return descriptor;
+				}
+			}
+		}
+		return null;
 	}
 
-	public void setDirectory(File directory) {
-		this.directory = directory;
+	public File getDirectory() {
+		return directory;
 	}
 
 	public File getClasses() {

@@ -68,7 +68,7 @@ public class ApplicationEventListener {
 						Logger bindingLogger = Logger.getLogger(file);
 						binding.put("$logger", bindingLogger);
 						binding.put("$log", bindingLogger);
-						scriptEngineManager.run(file, binding);
+						scriptEngineManager.runFile(file, binding);
 					} catch (Exception e) {
 						LOG.error("error when execute application listener: " + file, e);
 					}
