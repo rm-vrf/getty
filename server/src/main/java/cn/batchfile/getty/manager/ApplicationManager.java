@@ -2,8 +2,10 @@ package cn.batchfile.getty.manager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,7 +13,10 @@ import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.xml.XmlParser;
+import org.eclipse.jetty.xml.XmlParser.Node;
 import org.ho.yaml.Yaml;
+import org.xml.sax.SAXException;
 
 import cn.batchfile.getty.application.Application;
 import cn.batchfile.getty.application.Application.Mode;
@@ -87,6 +92,24 @@ public class ApplicationManager {
 
 		//set name
 		application.setName(dir.getName());
+		
+		//set port
+		try {
+			XmlParser parser = new XmlParser();
+			Node node = parser.parse(application.getDescriptor());
+			Iterator<Node> iter = node.iterator("context-param");
+			while (iter.hasNext()) {
+				Node n = iter.next();
+				String name = n.get("param-name").get(0).toString();
+				String value = n.get("param-value").get(0).toString();
+				if (name.toString().equals("getty.port")) {
+					application.setPort(Integer.valueOf(value));
+					break;
+				}
+			}
+		} catch (IOException e) {
+		} catch (SAXException e) {
+		}
 	}
 	
 	private void loadGettyApplication(Application application, File dir) {

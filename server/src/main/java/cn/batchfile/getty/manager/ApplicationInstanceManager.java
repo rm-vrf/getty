@@ -30,6 +30,7 @@ import cn.batchfile.getty.application.ApplicationInstance;
 import cn.batchfile.getty.application.ErrorHandler;
 import cn.batchfile.getty.exceptions.InvalidApplicationDescriptorException;
 import cn.batchfile.getty.lang.ApplicationClassLoader;
+import groovy.lang.GroovyClassLoader;
 
 public class ApplicationInstanceManager {
 	
@@ -44,7 +45,11 @@ public class ApplicationInstanceManager {
 		Server server = new Server(application.getPort());
 		setRuntimeParameters(server, application);
 		
+		//create classloader
+		ClassLoader cl = createClassLoader(application);
+		
 		WebAppContext context = new WebAppContext();
+		context.setClassLoader(cl);
 		context.setMaxFormContentSize(Integer.MAX_VALUE);
 		context.setContextPath("/");
 		context.setWar(application.getDirectory().getAbsolutePath());
@@ -56,9 +61,6 @@ public class ApplicationInstanceManager {
 		HashLoginService loginService = new HashLoginService("GETTY-SECURITY-REALM-" + application.getName());
 		context.getSecurityHandler().setLoginService(loginService);
 		server.setHandler(context);
-		
-		//create classloader
-		ClassLoader cl = createClassLoader(application);
 		
 		//create script manager
 		ScriptEngineManager sem = createScriptEngineManager(application, cl);
@@ -222,6 +224,7 @@ public class ApplicationInstanceManager {
 	}
 
 	private ClassLoader createClassLoader(Application application) {
+		
 		try {
 			//构建classpath
 			List<File> classpath = new ArrayList<File>();
@@ -239,7 +242,14 @@ public class ApplicationInstanceManager {
 			
 			//构建classloader
 			ApplicationClassLoader cl = new ApplicationClassLoader(urls, getClass().getClassLoader());
-			return cl;
+
+			GroovyClassLoader gcl = new GroovyClassLoader(cl);
+			gcl.addClasspath(application.getClasses().getAbsolutePath());
+			for (File lib : application.getLibs()) {
+				gcl.addClasspath(lib.getAbsolutePath());
+			}
+			
+			return gcl;
 		} catch (MalformedURLException e) {
 			throw new InvalidApplicationDescriptorException("error when create class loader", e);
 		}
