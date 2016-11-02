@@ -1,9 +1,18 @@
 package cn.batchfile.getty.server;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
@@ -78,9 +87,25 @@ public class Getty {
 			//找到webapps路径, 遍历子目录
 			LOG.info("application root: " + webapps);
 			File[] dirs = webapps.listFiles();
-			for (File dir : dirs) {
+			for (File file : dirs) {
+				
+				//忽略隐藏文件
+				String name = file.getName().toLowerCase();
+				if (StringUtils.startsWith(name, ".")) {
+					continue;
+				}
+				
+				//如果是zip或war，解压
+				File dir = null;
+				if (file.isFile() 
+						&& StringUtils.endsWith(name, ".zip") || StringUtils.endsWith(name, ".war")) {
+					dir = unzip(file);
+				} else if (file.isDirectory()) {
+					dir = file;
+				}
+				
 				//目录里面有项目文件，加载这个目录
-				if (new Application(dir).getDescriptor() != null) {
+				if (dir != null && new Application(dir).getDescriptor() != null) {
 					list.add(dir);
 				}
 			}
@@ -143,6 +168,12 @@ public class Getty {
 						if (info != null && info.exists()) {
 							return info.getParentFile();
 						}
+					} else if (StringUtils.endsWith(name, ".zip") || StringUtils.endsWith(name, ".war")) {
+						try {
+							unzip(descriptor);
+						} catch (Exception e) {
+							LOG.error("error when unzip: " + descriptor, e);
+						}
 					}
 					return null;
 				}
@@ -165,5 +196,35 @@ public class Getty {
 		}
 		
 		return list;
+	}
+	
+	private File unzip(File file) throws FileNotFoundException, IOException {
+		File base = new File(file.getParentFile(), StringUtils.substringBeforeLast(file.getName(), "."));
+		if (base.exists()) {
+			return null;
+		}
+		
+		LOG.info("unzip: " + file);
+		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+		ZipInputStream zis = new ZipInputStream(bis);
+		
+		ZipEntry entry = null;
+		while ((entry = zis.getNextEntry()) != null) {
+			File f = new File(base, entry.getName());
+			if (entry.isDirectory()) {
+				FileUtils.forceMkdir(f);
+			} else {
+				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));
+				int b = 0;
+				while ((b = zis.read()) != -1) {
+					bos.write(b);
+				}
+				bos.flush();
+				bos.close();
+			}
+		}
+		zis.close();
+		
+		return base;
 	}
 }
