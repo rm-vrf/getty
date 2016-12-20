@@ -21,8 +21,9 @@
 		<url>http://github.com/lane-cn/getty</url>
 	</scm>
 	<modules>
-		<module>demo</module>
 		<module>server</module>
+		<module>demo</module>
+		<module>demo2</module>
 	</modules>
 	<build>
 		<finalName>${project.name}-${project.version}</finalName>

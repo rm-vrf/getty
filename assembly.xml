@@ -56,5 +56,12 @@
 				<include>**/*</include>
 			</includes>
 		</fileSet>
+		<fileSet>
+			<outputDirectory>webapps/demo2-${project.version}-GA</outputDirectory>
+			<directory>demo2/target/demo2-${project.version}-GA/demo2-${project.version}</directory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
 	</fileSets>
 </assembly>
